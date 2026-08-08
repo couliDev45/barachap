@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion - BaraChap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <!-- COMMENTAIRE IMAGE: Logo principal BaraChap -->
+        <a href="../index.html" style="text-decoration: none;">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </a>
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="inscription.html" class="btn-primary">Inscription</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="auth-container">
+        <div class="auth-card">
+          <h2>Connexion à BaraChap</h2>
+          <p class="auth-subtitle">
+            Accédez à votre espace pour gérer vos demandes et services
+          </p>
+
+          <form id="connexionForm" class="auth-form">
+            <div>
+              <label for="identifiant">Numéro de téléphone ou Email</label>
+              <input
+                type="text"
+                id="identifiant"
+                name="identifiant"
+                placeholder="Ex: 0708091011 ou exemple@email.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="motdepasse">Mot de passe</label>
+              <input
+                type="password"
+                id="motdepasse"
+                name="motdepasse"
+                placeholder="Entrez votre mot de passe"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="typeCompte">Se connecter en tant que</label>
+              <select id="typeCompte" name="typeCompte" required>
+                <option value="client" selected>Client (Je cherche un service)</option>
+                <option value="prestataire">Prestataire (Je propose un service)</option>
+                <option value="admin">Administrateur (/admin)</option>
+              </select>
+            </div>
+
+            <div id="connexionMessage"></div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">
+              Se connecter
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            <p>
+              Vous n'avez pas encore de compte ?
+              <a href="inscription.html">Créer un compte</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225 07 00 00 00 00<br />
+          Email: contact@barachap.ci<br />
+          <span>Abidjan, Côte d'Ivoire</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

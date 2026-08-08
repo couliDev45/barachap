@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BaraChap - Trouvez un professionnel facilement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <img src="../assets/logo/logo-color.png" alt="logobarachap" />
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="#accueil">Accueil</a>
+        <a href="#services">Services</a>
+        <a href="#prestataires">Prestataires</a>
+        <a href="#dvp">Devenir Prestataire</a>
+        <button class="btn-primary">Connexion</button>
+      </nav>
+    </header>
+    <main>
+      <section class="profil-details">
+        <div class="profil-header">
+          <h2>Profil prestataire</h2>
+          <p>Tout savoir sur lui</p>
+        </div>
+        <div class="profil-photo">
+          <!-- COMMENTAIRE IMAGE: Photo de profil du prestataire -->
+          <img src="../assets/images/prestataire1.png" alt="prestataire" />
+          <h3>Kouassi Abou</h3>
+          <p>Plombier</p>
+          <span>Séguéla</span>
+          <div class="rating-badge">Note: 4.9 / 5</div>
+          <a href="demande.html" class="btn-primary retour-btn"
+            >Faire une demande</a
+          >
+        </div>
+        <div class="profil-info">
+          <h2>À propos</h2>
+          <p>Je suis plombier depuis 8 ans...</p>
+        </div>
+        <div class="services-list">
+          <h3>Services proposés</h3>
+          <ul>
+            <li>Réparation de fuite</li>
+            <li>Installation sanitaire</li>
+            <li>Débouchage</li>
+            <li>Entretien</li>
+          </ul>
+        </div>
+        <div class="galerie">
+          <h3>Réalisations</h3>
+          <!-- COMMENTAIRE IMAGE: Photo réalisation 1 -->
+          <img src="../assets/images/prestataire2.png" alt="Réalisation 1" />
+          <!-- COMMENTAIRE IMAGE: Photo réalisation 2 -->
+          <img src="../assets/images/prestataire2.png" alt="Réalisation 2" />
+          <!-- COMMENTAIRE IMAGE: Photo réalisation 3 -->
+          <img src="../assets/images/prestataire3.png" alt="Réalisation 3" />
+        </div>
+        <div class="avis">
+          <h3>Avis des clients</h3>
+          <div class="avis">
+            <div class="rating-badge">Note: 5.0 / 5</div>
+            <p>"Excellent travail."</p>
+            <strong>Jean Kouassi</strong>
+          </div>
+          <div class="avis">
+            <div class="rating-badge">Note: 4.0 / 5</div>
+            <p>"Très ponctuel."</p>
+            <strong>Awa Koné</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const nav = document.querySelector('.nav');
+
+        navToggle.addEventListener('click', () => {
+            const isOpen = nav.classList.toggle('nav-open');
+            navToggle.setAttribute('aria-expanded', isOpen);
+        });
+
+        // ferme le menu quand on clique sur un lien (mobile)
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('nav-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        })
+        document.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+
+        nav.classList.remove("nav-open");
+
+        navToggle.setAttribute("aria-expanded", "false");
+
+    }
+
+});
+    </script> -->
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

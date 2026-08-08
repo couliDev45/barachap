@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "name": "barachap-web",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/admin",
+      "dest": "/pages/dashboard-admin.html"
+    },
+    {
+      "src": "/connexion",
+      "dest": "/pages/connexion.html"
+    },
+    {
+      "src": "/inscription",
+      "dest": "/pages/inscription.html"
+    },
+    {
+      "src": "/prestataires",
+      "dest": "/pages/prestataires.html"
+    },
+    {
+      "src": "/services",
+      "dest": "/pages/services.html"
+    },
+    {
+      "src": "/profil",
+      "dest": "/pages/profil.html"
+    },
+    {
+      "src": "/demande",
+      "dest": "/pages/demande.html"
+    },
+    {
+      "src": "/dashboard-client",
+      "dest": "/pages/dashboard-client.html"
+    },
+    {
+      "src": "/dashboard-prestataire",
+      "dest": "/pages/dashboard-prestataire.html"
+    }
+  ]
+}

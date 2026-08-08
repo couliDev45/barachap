@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BaraChap - Trouvez un professionnel facilement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <!-- COMMENTAIRE IMAGE: Logo BaraChap header -->
+        <img src="../assets/logo/logo-color.png" alt="logobarachap" />
+      </div>
+      <button id="themeToggle" class="btn-primary">Mode sombre</button>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="dashboard">
+        <div class="section-title">
+          <h2>Tableau de bord Client</h2>
+          <p>Bonjour, Sherlock</p>
+        </div>
+        <div class="profile-progress">
+          <div class="progress-header">
+            <h3>Complétion du profil</h3>
+            <span id="progressValue">80%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+        <div class="dashboard-stats">
+          <div class="stat-card stat-total">
+            <h3>Total demandes</h3>
+            <p id="totalDemandes">0</p>
+          </div>
+
+          <div class="stat-card stat-attente">
+            <h3>En attente</h3>
+            <p id="attenteDemandes">0</p>
+          </div>
+
+          <div class="stat-card stat-acceptee">
+            <h3>Acceptées</h3>
+            <p id="accepteesDemandes">0</p>
+          </div>
+
+          <div class="stat-card stat-refusee">
+            <h3>Refusées</h3>
+            <p id="refuseesDemandes">0</p>
+          </div>
+        </div>
+
+        <h3 class="dashboard-title">Mes demandes</h3>
+        <div id="listeDemandes" class="dashboard-container"></div>
+        <!-- Le conteneur #dashboardStats a été retiré : il faisait doublon
+             avec le bloc .dashboard-stats ci-dessus, rempli par le même
+             dashboard.js via les IDs #totalDemandes / #attenteDemandes /
+             #accepteesDemandes / #refuseesDemandes. -->
+        <div id="loader">
+          <div class="spinner"></div>
+
+          <p>Chargement de BaraChap...</p>
+        </div>
+      </section>
+    </main>
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

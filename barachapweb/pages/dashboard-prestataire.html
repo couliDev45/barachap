@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tableau de bord Prestataire - BaraChap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <!-- COMMENTAIRE IMAGE: Logo principal BaraChap -->
+        <a href="../index.html" style="text-decoration: none;">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </a>
+      </div>
+      <button id="themeToggle" class="btn-primary">Mode sombre</button>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="dashboard-prestataire.html" style="color: var(--orange-primary);">Mon Espace</a>
+        <a href="connexion.html" class="btn-primary">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="dashboard">
+        <div class="section-title">
+          <h2>Tableau de bord Prestataire</h2>
+          <p>Bonjour, Jean Kouassi</p>
+        </div>
+
+        <div class="dashboard-stats">
+          <div class="stat-card stat-total">
+            <h3>Demandes reçues</h3>
+            <p id="prestataireDemandesRecues">5</p>
+          </div>
+
+          <div class="stat-card stat-acceptee">
+            <h3>Publications</h3>
+            <p id="prestatairePublications">10</p>
+          </div>
+
+          <div class="stat-card stat-attente">
+            <h3>Avis & Note</h3>
+            <p>4.9 / 5</p>
+          </div>
+
+          <div class="stat-card stat-refusee">
+            <h3>Statut compte</h3>
+            <p style="font-size: 20px; font-weight: 700;">Vérifié</p>
+          </div>
+        </div>
+
+        <div class="dashboard-actions" style="justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
+          <a href="profil.html" class="btn-primary" style="text-decoration: none;">Modifier profil</a>
+          <button class="btn-primary" id="btnAddService">Ajouter un service</button>
+          <button class="btn-primary" id="btnAddRealisation">Publier une réalisation</button>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+          <h3>Demandes de clients reçues</h3>
+          <p>Gérez les demandes de prestations qui vous ont été envoyées</p>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 60px;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Prestation</th>
+                <th>Ville / Quartier</th>
+                <th>Date souhaitée</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableDemandesRecues">
+              <tr>
+                <td><strong>Awa Koné</strong><br /><small>+225 0701020304</small></td>
+                <td>Plomberie - Réparation fuite d'eau</td>
+                <td>Séguéla</td>
+                <td>2026-08-10</td>
+                <td><span class="status attente">En attente</span></td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-success btn-accepter">Accepter</button>
+                    <button class="btn-danger btn-refuser">Refuser</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Marc Bamba</strong><br /><small>+225 0506070809</small></td>
+                <td>Plomberie - Installation sanitaire</td>
+                <td>Abidjan - Cocody</td>
+                <td>2026-08-12</td>
+                <td><span class="status acceptee">Acceptée</span></td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-secondary">Contacter</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Sophie Kouamé</strong><br /><small>+225 0102030405</small></td>
+                <td>Plomberie - Débouchage évier</td>
+                <td>Abidjan - Plateau</td>
+                <td>2026-08-15</td>
+                <td><span class="status attente">En attente</span></td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-success btn-accepter">Accepter</button>
+                    <button class="btn-danger btn-refuser">Refuser</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+          <h3>Mes services actifs</h3>
+        </div>
+
+        <div class="services-container" style="margin-bottom: 40px;">
+          <div class="service-card">
+            <h3>Réparation de fuite</h3>
+            <p>Intervention rapide sur fuites tuyauterie et robinetterie</p>
+          </div>
+          <div class="service-card">
+            <h3>Installation sanitaire</h3>
+            <p>Pose de lavabos, W.C, chauffe-eau et canalisations</p>
+          </div>
+          <div class="service-card">
+            <h3>Débouchage</h3>
+            <p>Débouchage haute pression des canalisations bouchées</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225 07 00 00 00 00<br />
+          Email: contact@barachap.ci<br />
+          <span>Abidjan, Côte d'Ivoire</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

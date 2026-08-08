@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prestataires - BaraChap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <!-- COMMENTAIRE IMAGE: Logo principal BaraChap -->
+        <a href="../index.html" style="text-decoration: none;">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </a>
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html" style="color: var(--orange-primary);">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="search-filter-section">
+        <div class="section-title">
+          <h2>Trouvez un professionnel qualifié</h2>
+          <p>Recherchez et filtrez les prestataires disponibles dans votre quartier</p>
+        </div>
+
+        <div style="max-width: 800px; margin: 0 auto;">
+          <div class="filter-group">
+            <label for="searchQuery">Quel service recherchez-vous ?</label>
+            <input
+              type="search"
+              id="searchQuery"
+              placeholder="Ex: Plombier, Électricien, Mécanicien, Cocody..."
+            />
+          </div>
+
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label for="filterCategory">Catégorie</label>
+              <select id="filterCategory">
+                <option value="all">Toutes les catégories</option>
+                <option value="plombier">Plombier</option>
+                <option value="electricien">Électricien</option>
+                <option value="taxi-moto">Taxi-moto / Chauffeur</option>
+                <option value="livraison">Livraison</option>
+                <option value="mecanicien">Mécanicien</option>
+                <option value="coiffeur">Coiffeur</option>
+                <option value="couturier">Couturier</option>
+                <option value="macon">Maçon</option>
+                <option value="menuisier">Menuisier</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterVille">Ville</label>
+              <select id="filterVille">
+                <option value="all">Toutes les villes</option>
+                <option value="abidjan">Abidjan</option>
+                <option value="seguela">Séguéla</option>
+                <option value="bouake">Bouaké</option>
+                <option value="daloa">Daloa</option>
+                <option value="kani">Kani</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterQuartier">Quartier</label>
+              <select id="filterQuartier">
+                <option value="all">Tous les quartiers</option>
+                <option value="cocody">Cocody</option>
+                <option value="yopougon">Yopougon</option>
+                <option value="marcory">Marcory</option>
+                <option value="plateau">Plateau</option>
+                <option value="bobi">Bobi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="advantages">
+        <div class="section-title">
+          <h2>Liste des prestataires</h2>
+          <p>Sélectionnez un professionnel pour voir ses réalisations et lui envoyer une demande</p>
+        </div>
+
+        <div class="advantages-container" id="prestatairesList">
+          <div class="advantage-card" data-category="plombier" data-ville="seguela" data-quartier="all">
+            <!-- COMMENTAIRE IMAGE: Photo de Kouassi Abou -->
+            <img src="../assets/images/prestataire1.png" alt="Kouassi Abou" />
+            <h3>Kouassi Abou</h3>
+            <p class="metier">Plombier</p>
+            <span>Séguéla</span>
+            <div class="rating-badge">Note: 4.9 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+
+          <div class="advantage-card" data-category="mecanicien" data-ville="kani" data-quartier="all">
+            <!-- COMMENTAIRE IMAGE: Photo de Coulibaly Jacob -->
+            <img src="../assets/images/prestataire2.png" alt="Coulibaly Jacob" />
+            <h3>Coulibaly Jacob</h3>
+            <p class="metier">Mécanicien</p>
+            <span>Kani</span>
+            <div class="rating-badge">Note: 4.5 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+
+          <div class="advantage-card" data-category="taxi-moto" data-ville="bouake" data-quartier="all">
+            <!-- COMMENTAIRE IMAGE: Photo de Bouabré Moussa -->
+            <img src="../assets/images/prestataire3.png" alt="Bouabré Moussa" />
+            <h3>Bouabré Moussa</h3>
+            <p class="metier">Chauffeur / Taxi-moto</p>
+            <span>Bouaké</span>
+            <div class="rating-badge">Note: 5.0 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+
+          <div class="advantage-card" data-category="electricien" data-ville="abidjan" data-quartier="cocody">
+            <!-- COMMENTAIRE IMAGE: Photo de Moussa Traoré -->
+            <img src="../assets/images/prestataire1.png" alt="Moussa Traoré" />
+            <h3>Moussa Traoré</h3>
+            <p class="metier">Électricien</p>
+            <span>Abidjan - Cocody</span>
+            <div class="rating-badge">Note: 4.9 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+
+          <div class="advantage-card" data-category="macon" data-ville="abidjan" data-quartier="bobi">
+            <!-- COMMENTAIRE IMAGE: Photo de Hamed Koné -->
+            <img src="../assets/images/prestataire2.png" alt="Hamed Koné" />
+            <h3>Hamed Koné</h3>
+            <p class="metier">Maçon</p>
+            <span>Bobi</span>
+            <div class="rating-badge">Note: 4.8 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+
+          <div class="advantage-card" data-category="coiffeur" data-ville="daloa" data-quartier="all">
+            <!-- COMMENTAIRE IMAGE: Photo d'Esther Bamba -->
+            <img src="../assets/images/prestataire3.png" alt="Esther Bamba" />
+            <h3>Esther Bamba</h3>
+            <p class="metier">Coiffeuse</p>
+            <span>Daloa</span>
+            <div class="rating-badge">Note: 5.0 / 5</div>
+            <a href="profil.html" class="btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">Voir profil</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225 07 00 00 00 00<br />
+          Email: contact@barachap.ci<br />
+          <span>Abidjan, Côte d'Ivoire</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>
