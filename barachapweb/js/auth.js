@@ -2,11 +2,13 @@
  * auth.js
  * Gère l'authentification et l'inscription sur la plateforme BaraChap :
  * - basculement dynamique entre profil Client et Prestataire sur inscription.html
- * - enregistrement du compte dans le localStorage
+ * - inscription et connexion via l'API Backend (POST /api/auth/register, /api/auth/login)
+ * - stockage du token JWT et de l'utilisateur reçus du serveur
  * - connexion et redirection selon le rôle (client, prestataire, admin)
  */
 
-import { afficherNotification, lireStockage, ecrireStockage } from "./utils.js";
+import { afficherNotification, ecrireStockage } from "./utils.js";
+import { requeteAPI } from "./api.js";
 
 // Gestion du formulaire d'inscription
 const inscriptionForm = document.querySelector("#inscriptionForm");
@@ -41,11 +43,12 @@ if (optClient && optPrestataire && champsPrestataire) {
 }
 
 if (inscriptionForm) {
-  inscriptionForm.addEventListener("submit", (e) => {
+  inscriptionForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const nomComplet = document.querySelector("#nomComplet")?.value.trim();
     const telephone = document.querySelector("#telephone")?.value.trim();
+    const email = document.querySelector("#email")?.value.trim() || null;
     const motdepasse = document.querySelector("#motdepasse")?.value;
     const confirmerMotdepasse = document.querySelector("#confirmerMotdepasse")?.value;
     const roleRadio = document.querySelector("input[name='role']:checked")?.value || "client";
@@ -60,6 +63,9 @@ if (inscriptionForm) {
       return;
     }
 
+    // Champs spécifiques au rôle Prestataire (attendus séparément par le backend :
+    // ville / quartier). Le formulaire actuel n'a qu'un champ combiné villeQuartier,
+    // donc on envoie la même valeur dans les deux tant qu'il n'est pas scindé en deux champs.
     let extraData = {};
     if (roleRadio === "prestataire") {
       const metier = document.querySelector("#metier")?.value;
@@ -69,23 +75,37 @@ if (inscriptionForm) {
         afficherNotification("Veuillez sélectionner votre métier.", "warning");
         return;
       }
-      extraData = { metier, villeQuartier, statutValidation: "En attente" };
+      extraData = { metier, ville: villeQuartier || "Abidjan", quartier: villeQuartier || null };
     }
 
-    const utilisateur = {
-      nomComplet,
-      telephone,
-      role: roleRadio,
-      ...extraData,
-      dateCreation: new Date().toISOString(),
-    };
+    const submitButton = inscriptionForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
 
-    let utilisateurs = lireStockage("utilisateurs", []);
-    utilisateurs.push(utilisateur);
-    ecrireStockage("utilisateurs", utilisateurs);
+    const reponse = await requeteAPI("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        nomComplet,
+        telephone,
+        email,
+        password: motdepasse,
+        role: roleRadio,
+        ...extraData,
+      }),
+    });
 
-    // Enregistre l'utilisateur connecté
-    ecrireStockage("utilisateurConnecte", utilisateur);
+    if (submitButton) submitButton.disabled = false;
+
+    if (!reponse || !reponse.token) {
+      afficherNotification(
+        "Impossible de créer le compte pour le moment. Veuillez réessayer.",
+        "error",
+      );
+      return;
+    }
+
+    // Stocke le token JWT et l'utilisateur reçus du serveur
+    ecrireStockage("jwt_token", reponse.token);
+    ecrireStockage("utilisateurConnecte", reponse.user);
 
     afficherNotification("Compte créé avec succès ! Redirection...", "success");
 
@@ -103,7 +123,7 @@ if (inscriptionForm) {
 const connexionForm = document.querySelector("#connexionForm");
 
 if (connexionForm) {
-  connexionForm.addEventListener("submit", (e) => {
+  connexionForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const identifiant = document.querySelector("#identifiant")?.value.trim();
@@ -115,21 +135,36 @@ if (connexionForm) {
       return;
     }
 
-    // Simulation de connexion réussie
-    const session = {
-      identifiant,
-      role: typeCompte,
-      dateConnexion: new Date().toISOString(),
-    };
+    const submitButton = connexionForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
 
-    ecrireStockage("utilisateurConnecte", session);
+    const reponse = await requeteAPI("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        identifiant,
+        password: motdepasse,
+        typeCompte,
+      }),
+    });
+
+    if (submitButton) submitButton.disabled = false;
+
+    if (!reponse || !reponse.token) {
+      afficherNotification("Identifiant ou mot de passe incorrect.", "error");
+      return;
+    }
+
+    // Stocke le token JWT et l'utilisateur reçus du serveur
+    ecrireStockage("jwt_token", reponse.token);
+    ecrireStockage("utilisateurConnecte", reponse.user);
 
     afficherNotification("Connexion réussie ! Redirection en cours...", "success");
 
     setTimeout(() => {
-      if (typeCompte === "admin") {
+      const roleServeur = reponse.user?.role || typeCompte;
+      if (roleServeur === "admin") {
         window.location.href = "dashboard-admin.html";
-      } else if (typeCompte === "prestataire") {
+      } else if (roleServeur === "prestataire") {
         window.location.href = "dashboard-prestataire.html";
       } else {
         window.location.href = "dashboard-client.html";
