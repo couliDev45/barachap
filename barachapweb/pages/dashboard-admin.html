@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administration - BaraChap</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -53,11 +57,11 @@
         <div class="dashboard-stats">
           <div class="stat-card stat-total">
             <h3>Utilisateurs</h3>
-            <p>120</p>
+            <p id="statTotalUsers">120</p>
           </div>
           <div class="stat-card stat-acceptee">
             <h3>Prestataires actifs</h3>
-            <p>45</p>
+            <p id="statPrestatairesActifs">45</p>
           </div>
           <div class="stat-card stat-attente">
             <h3>En attente de validation</h3>
@@ -65,7 +69,7 @@
           </div>
           <div class="stat-card stat-refusee">
             <h3>Demandes totales</h3>
-            <p>310</p>
+            <p id="statDemandesTotales">310</p>
           </div>
         </div>
 
@@ -153,7 +157,7 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="tableUtilisateurs">
                 <tr>
                   <td>Sherlock Holmes</td>
                   <td>Client</td>

@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaraChap - Trouvez un professionnel facilement</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -29,11 +33,11 @@
         <span></span>
       </button>
       <nav class="nav">
-        <a href="#accueil">Accueil</a>
-        <a href="#services">Services</a>
-        <a href="#prestataires">Prestataires</a>
-        <a href="#dvp">Devenir Prestataire</a>
-        <button class="btn-primary">Connexion</button>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
       </nav>
     </header>
     <section class="hero" id="services">
@@ -73,15 +77,15 @@
           <button class="btn-primary filter-btn" data-filter="mecanicien">
             Mécanicien
           </button>
-          <button class="btn-primary filter-btn" data-filter="menusier">
-            Ménusier
+          <button class="btn-primary filter-btn" data-filter="menuisier">
+            Menuisier
           </button>
         </div>
       </div>
     </section>
     <!-- les prestataires -->
     <section class="advantages">
-      <div class="advantages-container">
+      <div class="advantages-container" id="prestatairesGrid">
         <div class="advantage-card" data-category="plombier">
           <!-- COMMENTAIRE IMAGE: Photo de Kouassi Abou -->
           <img src="../assets/images/prestataire1.png" alt="prestataire" />
