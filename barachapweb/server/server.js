@@ -6,7 +6,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import logger from "./utils/logger.js";
+ 
 import authRoutes from "./routes/auth.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import demandesRoutes from "./routes/demandes.routes.js";
@@ -49,9 +50,9 @@ app.use((req, res) => {
 
 // Démarrage du serveur
 app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(` Serveur API BaraChap démarré avec succès !`);
-  console.log(` Port: http://localhost:${PORT}`);
-  console.log(` Healthcheck: http://localhost:${PORT}/api/health`);
-  console.log(`====================================================`);
+  logger.info("====================================================");
+  logger.info(" Serveur API BaraChap démarré avec succès !");
+  logger.info(` Port: http://localhost:${PORT}`);
+  logger.info(` Healthcheck: http://localhost:${PORT}/api/health`);
+  logger.info("====================================================");
 });

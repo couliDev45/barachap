@@ -4,6 +4,7 @@
  */
 
 import { Router } from "express";
+import logger from "../utils/logger.js";
 import { query } from "../config/db.js";
 
 const router = Router();
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
     const result = await query(sql, params);
     res.json({ demandes: result.rows });
   } catch (err) {
-    console.error("Erreur Liste Demandes :", err);
+    logger.error("Erreur Liste Demandes :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des demandes." });
   }
 });
@@ -61,7 +62,7 @@ router.post("/", async (req, res) => {
       demande: result.rows[0],
     });
   } catch (err) {
-    console.error("Erreur Création Demande :", err);
+    logger.error("Erreur Création Demande :", err);
     res.status(500).json({ message: "Erreur serveur lors de la création de la demande." });
   }
 });
@@ -93,7 +94,7 @@ router.put("/:id", async (req, res) => {
       demande: result.rows[0],
     });
   } catch (err) {
-    console.error("Erreur Maj Demande :", err);
+    logger.error("Erreur Maj Demande :", err);
     res.status(500).json({ message: "Erreur serveur lors de la mise à jour de la demande." });
   }
 });
@@ -114,7 +115,7 @@ router.delete("/:id", async (req, res) => {
 
     res.json({ message: "Demande supprimée avec succès." });
   } catch (err) {
-    console.error("Erreur Suppression Demande :", err);
+    logger.error("Erreur Suppression Demande :", err);
     res.status(500).json({ message: "Erreur serveur lors de la suppression." });
   }
 });
