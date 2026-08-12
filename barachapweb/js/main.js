@@ -12,10 +12,10 @@ import "./api.js";
 import "./menu.js";
 import "./utils.js";
 import "./services.js";
+import "./prestataires.js";
+import "./profil.js";
 import "./demande.js";
 import "./dashboard.js";
 import "./auth.js";
 import "./prestataire.js";
 import "./admin.js";
-
-

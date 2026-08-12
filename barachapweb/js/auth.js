@@ -4,7 +4,10 @@
  * - basculement dynamique entre profil Client et Prestataire sur inscription.html
  * - inscription et connexion via l'API Backend (POST /api/auth/register, /api/auth/login)
  * - stockage du token JWT et de l'utilisateur reçus du serveur
- * - connexion et redirection selon le rôle (client, prestataire, admin)
+ * - connexion et redirection selon le rôle renvoyé par le serveur
+ *
+ * Note : inscription.html n'a pas de champ #email, donc email est toujours
+ * null à l'inscription — c'est prévu et géré côté backend (email || null).
  */
 
 import { afficherNotification, ecrireStockage } from "./utils.js";
@@ -17,7 +20,6 @@ const optPrestataire = document.querySelector("#optPrestataire");
 const champsPrestataire = document.querySelector("#champsPrestataire");
 
 if (optClient && optPrestataire && champsPrestataire) {
-  // Pré-sélection par URL param (ex: ?role=prestataire)
   const urlParams = new URLSearchParams(window.location.search);
   const roleParam = urlParams.get("role");
 
@@ -48,7 +50,6 @@ if (inscriptionForm) {
 
     const nomComplet = document.querySelector("#nomComplet")?.value.trim();
     const telephone = document.querySelector("#telephone")?.value.trim();
-    const email = document.querySelector("#email")?.value.trim() || null;
     const motdepasse = document.querySelector("#motdepasse")?.value;
     const confirmerMotdepasse = document.querySelector("#confirmerMotdepasse")?.value;
     const roleRadio = document.querySelector("input[name='role']:checked")?.value || "client";
@@ -63,9 +64,8 @@ if (inscriptionForm) {
       return;
     }
 
-    // Champs spécifiques au rôle Prestataire (attendus séparément par le backend :
-    // ville / quartier). Le formulaire actuel n'a qu'un champ combiné villeQuartier,
-    // donc on envoie la même valeur dans les deux tant qu'il n'est pas scindé en deux champs.
+    // Le formulaire n'a qu'un champ villeQuartier combiné : envoyé tel quel
+    // dans ville ET quartier tant qu'il n'est pas scindé en deux champs.
     let extraData = {};
     if (roleRadio === "prestataire") {
       const metier = document.querySelector("#metier")?.value;
@@ -86,7 +86,7 @@ if (inscriptionForm) {
       body: JSON.stringify({
         nomComplet,
         telephone,
-        email,
+        email: null,
         password: motdepasse,
         role: roleRadio,
         ...extraData,
@@ -103,18 +103,14 @@ if (inscriptionForm) {
       return;
     }
 
-    // Stocke le token JWT et l'utilisateur reçus du serveur
     ecrireStockage("jwt_token", reponse.token);
     ecrireStockage("utilisateurConnecte", reponse.user);
 
     afficherNotification("Compte créé avec succès ! Redirection...", "success");
 
     setTimeout(() => {
-      if (roleRadio === "prestataire") {
-        window.location.href = "dashboard-prestataire.html";
-      } else {
-        window.location.href = "dashboard-client.html";
-      }
+      window.location.href =
+        roleRadio === "prestataire" ? "dashboard-prestataire.html" : "dashboard-client.html";
     }, 1200);
   });
 }
@@ -140,11 +136,7 @@ if (connexionForm) {
 
     const reponse = await requeteAPI("/auth/login", {
       method: "POST",
-      body: JSON.stringify({
-        identifiant,
-        password: motdepasse,
-        typeCompte,
-      }),
+      body: JSON.stringify({ identifiant, password: motdepasse, typeCompte }),
     });
 
     if (submitButton) submitButton.disabled = false;
@@ -154,13 +146,14 @@ if (connexionForm) {
       return;
     }
 
-    // Stocke le token JWT et l'utilisateur reçus du serveur
     ecrireStockage("jwt_token", reponse.token);
     ecrireStockage("utilisateurConnecte", reponse.user);
 
     afficherNotification("Connexion réussie ! Redirection en cours...", "success");
 
     setTimeout(() => {
+      // Le rôle renvoyé par le serveur fait foi (plus fiable que le select,
+      // au cas où l'utilisateur se trompe de type de compte)
       const roleServeur = reponse.user?.role || typeCompte;
       if (roleServeur === "admin") {
         window.location.href = "dashboard-admin.html";

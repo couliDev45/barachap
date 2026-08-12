@@ -2,29 +2,33 @@
  * demande.js
  * Gère le formulaire de demande de service :
  * - pré-remplissage en mode modification
- * - validation et soumission
+ * - validation et soumission via l'API (POST /api/demandes)
  * - date minimale (empêche de choisir une date passée)
- * Dépend de utils.js (lireStockage, ecrireStockage, afficherMessage, obtenirDateAujourdhui, trouverChampManquant).
+ * - récupère un ?prestataireId= dans l'URL si on arrive depuis un profil
+ *   prestataire (voir profil.js), pour cibler directement la demande
+ *
+ * Note : le champ #photo du formulaire n'est pas envoyé — la route backend
+ * POST /api/demandes n'accepte pas encore de fichier/upload.
  */
 
 import {
   lireStockage,
-  ecrireStockage,
   afficherMessage,
   obtenirDateAujourdhui,
   trouverChampManquant,
 } from "./utils.js";
+import { requeteAPI } from "./api.js";
 
 const demandeForm = document.querySelector("#demandeForm");
 const message = document.querySelector("#message");
 const dateInput = document.querySelector("#date");
 
-// Empêche de choisir une date passée
 if (dateInput) {
   dateInput.setAttribute("min", obtenirDateAujourdhui());
 }
 
 // Pré-remplissage du formulaire si on arrive en mode "modification"
+// (demandeEnCours est déposé par dashboard.js, voir modifierDemande)
 if (demandeForm) {
   const demandeEnCours = lireStockage("demandeEnCours", null);
 
@@ -36,8 +40,7 @@ if (demandeForm) {
     const besoinInput = document.querySelector("#besoin");
     const villeInput = document.querySelector("#ville");
 
-    if (prestationInput)
-      prestationInput.value = demandeEnCours.prestation || "";
+    if (prestationInput) prestationInput.value = demandeEnCours.prestation || "";
     if (nomInput) nomInput.value = demandeEnCours.nom || "";
     if (prenomInput) prenomInput.value = demandeEnCours.prenom || "";
     if (telephoneInput) telephoneInput.value = demandeEnCours.telephone || "";
@@ -45,27 +48,22 @@ if (demandeForm) {
     if (dateInput) dateInput.value = demandeEnCours.date || "";
     if (villeInput) villeInput.value = demandeEnCours.ville || "";
 
-    // Adapte le libellé du bouton pour indiquer qu'on modifie
     const submitButton = demandeForm.querySelector("button[type='submit']");
     if (submitButton) submitButton.textContent = "Mettre à jour la demande";
   }
 }
 
 if (demandeForm) {
-  demandeForm.addEventListener("submit", function (event) {
+  demandeForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    // Récupère chaque champ individuellement pour éviter un crash
-    // si l'un d'eux est absent du DOM (ex: mauvais id ou champ optionnel)
     const prestationInput = document.querySelector("#prestation");
     const nomInput = document.querySelector("#nom");
     const prenomInput = document.querySelector("#prenom");
     const telephoneInput = document.querySelector("#telephone");
     const besoinInput = document.querySelector("#besoin");
     const villeInput = document.querySelector("#ville");
-    const photoInput = document.querySelector("#photo");
 
-    // Vérifie que les champs obligatoires existent bien dans le HTML
     const champsObligatoires = {
       prestation: prestationInput,
       nom: nomInput,
@@ -88,7 +86,11 @@ if (demandeForm) {
       return;
     }
 
-    // Création de l'objet demande
+    // Prestataire ciblé si on arrive depuis profil.html?id=X (voir profil.js
+    // qui construit le lien "Faire une demande" avec ?prestataireId=X)
+    const urlParams = new URLSearchParams(window.location.search);
+    const prestataireId = urlParams.get("prestataireId") || null;
+
     const demande = {
       prestation: prestationInput.value.trim(),
       nom: nomInput.value.trim(),
@@ -97,72 +99,60 @@ if (demandeForm) {
       besoin: besoinInput.value.trim(),
       date: dateInput.value,
       ville: villeInput.value.trim(),
-      photo:
-        photoInput && photoInput.files[0] ? photoInput.files[0].name : null,
-      statut: "En attente",
-      dateCreation: new Date().toISOString(),
+      prestataireId,
     };
 
-    try {
-      // Récupère les anciennes demandes
-      let demandes = lireStockage("demandes", []);
-      if (!Array.isArray(demandes)) {
-        demandes = [];
-      }
+    const demandeEnCours = lireStockage("demandeEnCours", null);
+    const enModeModification = Boolean(demandeEnCours && demandeEnCours.id);
 
-      // Vérifie si on est en mode modification
-      const indexModificationStr = localStorage.getItem("indexModification");
-      const enModeModification =
-        indexModificationStr !== null &&
-        demandes[parseInt(indexModificationStr, 10)];
+    const submitButton = demandeForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
 
-      if (enModeModification) {
-        const indexModification = parseInt(indexModificationStr, 10);
+    let reponse;
+    if (enModeModification) {
+      // Le backend n'expose qu'une mise à jour du statut (PUT /api/demandes/:id),
+      // pas une modification complète du contenu (nom, date, ville, besoin...).
+      // En attendant une vraie route de mise à jour côté serveur, on recrée la
+      // demande avec les nouvelles valeurs (suppression de l'ancienne + création
+      // d'une nouvelle) pour que les modifications soient réellement appliquées.
+      await requeteAPI(`/demandes/${demandeEnCours.id}`, { method: "DELETE" });
+      reponse = await requeteAPI("/demandes", {
+        method: "POST",
+        body: JSON.stringify(demande),
+      });
+    } else {
+      reponse = await requeteAPI("/demandes", {
+        method: "POST",
+        body: JSON.stringify(demande),
+      });
+    }
 
-        // Conserve le statut et la date de création d'origine
-        demande.statut = demandes[indexModification].statut;
-        demande.dateCreation = demandes[indexModification].dateCreation;
+    if (submitButton) submitButton.disabled = false;
 
-        // Remplace la demande existante au lieu d'en ajouter une nouvelle
-        demandes[indexModification] = demande;
+    if (!reponse) {
+      const messageErreur = lireStockage("utilisateurConnecte", null)
+        ? "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer."
+        : "Vous devez être connecté pour envoyer une demande.";
+      afficherMessage(message, messageErreur, "error");
+      return;
+    }
 
-        // Nettoie les infos de modification
-        localStorage.removeItem("demandeEnCours");
-        localStorage.removeItem("indexModification");
-      } else {
-        // Ajoute la nouvelle demande
-        demandes.push(demande);
-      }
+    localStorage.removeItem("demandeEnCours");
 
-      // Sauvegarde la liste mise à jour
-      ecrireStockage("demandes", demandes);
+    afficherMessage(
+      message,
+      enModeModification
+        ? "Demande modifiée avec succès."
+        : "Votre demande a bien été envoyée. Le prestataire vous contactera bientôt.",
+      "success",
+    );
 
-      // Retour visuel de succès à l'utilisateur
-      afficherMessage(
-        message,
-        enModeModification
-          ? "Demande modifiée avec succès."
-          : "Votre demande a bien été envoyée. Le prestataire vous contactera bientôt.",
-        "success",
-      );
+    demandeForm.reset();
 
-      demandeForm.reset();
-
-      // Redirige vers le dashboard uniquement après une modification réussie
-      if (enModeModification) {
-        setTimeout(() => {
-          window.location.href = "dashboard-client.html";
-        }, 1500);
-      }
-    } catch (erreur) {
-      // Peut arriver si le localStorage est plein, désactivé,
-      // ou si le JSON stocké est corrompu
-      console.error("Erreur lors de la sauvegarde de la demande :", erreur);
-      afficherMessage(
-        message,
-        "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
-        "error",
-      );
+    if (enModeModification) {
+      setTimeout(() => {
+        window.location.href = "dashboard-client.html";
+      }, 1500);
     }
   });
 }

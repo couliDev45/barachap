@@ -1,32 +1,38 @@
 /**
  * dashboard.js
  * Gère le tableau de bord client :
+ * - message de bienvenue avec le vrai prénom de l'utilisateur connecté
  * - statistiques dynamiques (total, en attente, acceptées, refusées)
- * - affichage de la liste des demandes
- * - suppression d'une demande
+ * - affichage de la liste des demandes (GET /api/demandes)
+ * - suppression d'une demande (DELETE /api/demandes/:id)
  * - passage en mode modification (redirection vers demande.html)
- * Dépend de utils.js (lireStockage, ecrireStockage).
+ * Dépend de utils.js (lireStockage, ecrireStockage) et api.js (requeteAPI).
+ *
+ * Note : le serveur filtre automatiquement les demandes du client connecté
+ * à partir du token JWT — pas besoin d'envoyer son id en paramètre.
  */
 
 import { lireStockage, ecrireStockage } from "./utils.js";
+import { requeteAPI } from "./api.js";
 
 const listeDemandes = document.querySelector("#listeDemandes");
 
-// Normalise un statut en une clé fiable pour les stats et le CSS,
-// insensible à la casse et aux accents (ex: "Accepté" / "accepte" -> "acceptee")
+// Garde en mémoire les demandes affichées pour que modifierDemande()
+// retrouve l'objet complet à partir de son id
+let demandesActuelles = [];
+
 function normaliserStatut(statut) {
   const texte = (statut || "")
     .toString()
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, ""); // retire les accents
+    .replace(/[\u0300-\u036f]/g, "");
 
   if (texte.includes("accept")) return "acceptee";
   if (texte.includes("refus")) return "refusee";
   return "attente";
 }
 
-// Empêche l'injection HTML depuis les champs saisis par l'utilisateur (nom, ville, etc.)
 function echapperHTML(texte) {
   const div = document.createElement("div");
   div.textContent = texte ?? "";
@@ -39,20 +45,14 @@ const STATUT_CONFIG = {
   refusee: { label: "Refusée", classe: "refusee" },
 };
 
-/**
- * Calcule les statistiques à partir de la liste des demandes
- * et les affiche dans #dashboardStats.
- */
 function afficherStatistiques(demandes) {
   const total = demandes.length;
   const compteurs = { attente: 0, acceptee: 0, refusee: 0 };
 
   demandes.forEach((demande) => {
-    const cle = normaliserStatut(demande.statut);
-    compteurs[cle]++;
+    compteurs[normaliserStatut(demande.statut)]++;
   });
 
-  // Remplit le bloc de stats présent dans dashboard-client.html
   const totalEl = document.querySelector("#totalDemandes");
   const attenteEl = document.querySelector("#attenteDemandes");
   const accepteesEl = document.querySelector("#accepteesDemandes");
@@ -64,29 +64,27 @@ function afficherStatistiques(demandes) {
   if (refuseesEl) refuseesEl.textContent = compteurs.refusee;
 }
 
-/**
- * Construit le HTML d'une carte de demande.
- */
-function construireCarteDemande(demande, index) {
+// Les champs viennent tels quels de la base (nom_client, prenom_client,
+// date_souhaitee...) car l'API renvoie directement les colonnes SQL.
+function construireCarteDemande(demande) {
   const cleStatut = normaliserStatut(demande.statut);
   const config = STATUT_CONFIG[cleStatut];
 
   return `
     <div class="prestataire-card">
       <div class="card-header">
-        <h3>Demande n°${index + 1}</h3>
+        <h3>${echapperHTML(demande.prestation)}</h3>
         <span class="status ${config.classe}">${config.label}</span>
       </div>
 
-      <p><strong>Service :</strong> ${echapperHTML(demande.prestation)}</p>
-      <p><strong>Nom :</strong> ${echapperHTML(demande.nom)} ${echapperHTML(demande.prenom)}</p>
+      <p><strong>Nom :</strong> ${echapperHTML(demande.nom_client)} ${echapperHTML(demande.prenom_client)}</p>
       <p><strong>Ville :</strong> ${echapperHTML(demande.ville)}</p>
 
       <div class="dashboard-actions">
-        <button class="btn-primary" onclick="modifierDemande(${index})">
+        <button class="btn-primary" onclick="modifierDemande(${demande.id})">
           Modifier
         </button>
-        <button class="btn-delete" onclick="supprimerDemande(${index})">
+        <button class="btn-delete" onclick="supprimerDemande(${demande.id})">
           Supprimer
         </button>
       </div>
@@ -94,17 +92,24 @@ function construireCarteDemande(demande, index) {
   `;
 }
 
-/**
- * Recharge et affiche la liste des demandes + les statistiques.
- */
-function actualiserDashboard() {
-  const demandes = lireStockage("demandes", []);
+async function actualiserDashboard() {
+  const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
 
-  afficherStatistiques(demandes);
+  if (!utilisateurConnecte) {
+    if (listeDemandes) {
+      listeDemandes.innerHTML = `<div class="etat-vide"><p>Veuillez vous connecter pour voir vos demandes.</p></div>`;
+    }
+    return;
+  }
+
+  const reponse = await requeteAPI("/demandes");
+  demandesActuelles = reponse?.demandes || [];
+
+  afficherStatistiques(demandesActuelles);
 
   if (!listeDemandes) return;
 
-  if (demandes.length === 0) {
+  if (demandesActuelles.length === 0) {
     listeDemandes.innerHTML = `
       <div class="etat-vide">
         <p>Aucune demande enregistrée pour le moment.</p>
@@ -113,45 +118,49 @@ function actualiserDashboard() {
     return;
   }
 
-  // Construit tout le HTML en une seule passe (une seule écriture DOM,
-  // au lieu de innerHTML += dans la boucle qui reparse à chaque itération)
-  const html = demandes
-    .map((demande, index) => construireCarteDemande(demande, index))
-    .join("");
-
-  listeDemandes.innerHTML = html;
+  listeDemandes.innerHTML = demandesActuelles.map(construireCarteDemande).join("");
 }
 
-// actualiserDashboard() gère elle-même l'absence de #listeDemandes ou des
-// IDs de stats individuels — on l'appelle systématiquement.
+// Message de bienvenue avec le vrai prénom de l'utilisateur connecté
+const clientGreeting = document.querySelector("#clientGreeting");
+if (clientGreeting) {
+  const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
+  if (utilisateurConnecte?.nom_complet) {
+    const prenom = utilisateurConnecte.nom_complet.split(" ")[0];
+    clientGreeting.textContent = `Bonjour, ${prenom}`;
+  }
+}
+
 actualiserDashboard();
 
-window.supprimerDemande = function supprimerDemande(index) {
+window.supprimerDemande = async function supprimerDemande(id) {
   if (confirm("Voulez-vous vraiment supprimer cette demande ?")) {
-    let demandes = lireStockage("demandes", []);
-
-    demandes.splice(index, 1);
-
-    ecrireStockage("demandes", demandes);
-
-    // Réaffiche sans recharger la page entière
+    await requeteAPI(`/demandes/${id}`, { method: "DELETE" });
     actualiserDashboard();
   }
 };
 
-window.modifierDemande = function modifierDemande(index) {
-  // Récupère toutes les demandes
-  const demandes = lireStockage("demandes", []);
+window.modifierDemande = function modifierDemande(id) {
+  const demande = demandesActuelles.find((d) => d.id === id);
+  if (!demande) return;
 
-  // Enregistre la demande sélectionnée
-  ecrireStockage("demandeEnCours", demandes[index]);
+  // Normalise les noms de colonnes SQL vers les noms de champs attendus
+  // par le formulaire de demande.js, et conserve l'id réel pour le
+  // DELETE + POST effectué à la resoumission (voir demande.js)
+  ecrireStockage("demandeEnCours", {
+    id: demande.id,
+    prestation: demande.prestation,
+    nom: demande.nom_client,
+    prenom: demande.prenom_client,
+    telephone: demande.telephone_client,
+    besoin: demande.besoin,
+    date: demande.date_souhaitee ? String(demande.date_souhaitee).slice(0, 10) : "",
+    ville: demande.ville,
+  });
 
-  // Enregistre également son index
-  localStorage.setItem("indexModification", index);
-
-  // Redirection vers le formulaire
   window.location.href = "demande.html";
 };
+
 // Barre de progression du profil (statique pour le moment)
 const progressFill = document.querySelector(".progress-fill");
 const progressValue = document.querySelector("#progressValue");
@@ -162,36 +171,25 @@ if (progressFill && progressValue) {
   progressValue.textContent = progression + "%";
 }
 
-// Bascule thème clair/sombre, seulement si le bouton existe sur la page
+// Bascule thème clair/sombre
 const boutonTheme = document.querySelector("#themeToggle");
 
 if (boutonTheme) {
   boutonTheme.addEventListener("click", () => {
     document.body.classList.toggle("dark-mode");
-
-    localStorage.setItem(
-      "theme",
-      document.body.classList.contains("dark-mode") ? "dark" : "light",
-    );
+    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
   });
 
   const theme = localStorage.getItem("theme");
-
   if (theme === "dark") {
     document.body.classList.add("dark-mode");
   }
 }
 
-// Masque l'écran de chargement, seulement si le loader existe sur la page
 window.addEventListener("load", () => {
   const loader = document.querySelector("#loader");
-
   if (!loader) return;
-
   loader.style.opacity = "0";
   loader.style.transition = ".5s";
-
-  setTimeout(() => {
-    loader.remove();
-  }, 500);
+  setTimeout(() => loader.remove(), 500);
 });
