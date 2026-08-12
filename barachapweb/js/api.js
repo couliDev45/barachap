@@ -19,18 +19,21 @@ export async function requeteAPI(endpoint, options = {}) {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
+
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Erreur serveur ${response.status}`);
     }
+
     return await response.json();
   } catch (error) {
-    console.warn(`API indisponible (${endpoint}), utilisation du mode secours localStorage:`, error.message);
+    console.warn(`API indisponible (${endpoint}), utilisation du mode secours localStorage:`, error?.message || error);
     return null;
   }
 }

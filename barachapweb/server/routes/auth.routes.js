@@ -10,7 +10,7 @@ import { query } from "../config/db.js";
 import { verifierToken } from "../middleware/auth.js";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "barachap_super_secret_key_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * POST /api/auth/register
