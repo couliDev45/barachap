@@ -4,6 +4,7 @@
  */
 
 import { Router } from "express";
+import logger from "../utils/logger.js";
 import { query } from "../config/db.js";
 
 const router = Router();
@@ -20,7 +21,7 @@ router.get("/pending", async (req, res) => {
 
     res.json({ pendingPrestataires: result.rows });
   } catch (err) {
-    console.error("Erreur Admin Pending :", err);
+    logger.error("Erreur Admin Pending :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des validations." });
   }
 });
@@ -50,7 +51,7 @@ router.put("/validate/:id", async (req, res) => {
       prestataire: result.rows[0],
     });
   } catch (err) {
-    console.error("Erreur Admin Validate :", err);
+    logger.error("Erreur Admin Validate :", err);
     res.status(500).json({ message: "Erreur serveur lors de la validation." });
   }
 });
@@ -67,7 +68,7 @@ router.get("/users", async (req, res) => {
 
     res.json({ users: result.rows });
   } catch (err) {
-    console.error("Erreur Admin Users :", err);
+    logger.error("Erreur Admin Users :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des utilisateurs." });
   }
 });
@@ -94,7 +95,7 @@ router.post("/categories", async (req, res) => {
       categorie: result.rows[0],
     });
   } catch (err) {
-    console.error("Erreur Admin Category :", err);
+    logger.error("Erreur Admin Category :", err);
     res.status(500).json({ message: "Erreur serveur lors de la création de la catégorie." });
   }
 });
@@ -119,7 +120,7 @@ router.get("/stats", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Erreur Admin Stats :", err);
+    logger.error("Erreur Admin Stats :", err);
     res.status(500).json({ message: "Erreur serveur lors du calcul des statistiques." });
   }
 });

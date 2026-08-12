@@ -94,7 +94,7 @@ INSERT INTO categories (nom, description) VALUES
     ('Menuisier', 'Fabrication et réparation de meubles')
 ON CONFLICT (nom) DO NOTHING;
 
--- Création d un administrateur par défaut (mot de passe: admin12345)
-INSERT INTO users (nom_complet, telephone, email, password_hash, role, statut_validation) VALUES
-    ('Administrateur BaraChap', '+2250700000000', 'admin@barachap.ci', '$2a$10$p4XwM3.HjI717k1P4.YqOu0.X4Z740M0h1X1.p4XwM3.HjI717k1P', 'admin', 'Validé')
-ON CONFLICT (telephone) DO NOTHING;
+-- Admin user creation removed for security. Create an admin user manually with a secure password.
+-- INSERT INTO users (nom_complet, telephone, email, password_hash, role, statut_validation) VALUES
+--     ('Administrateur BaraChap', '+2250700000000', 'admin@barachap.ci', '<bcrypt_hash_here>', 'admin', 'Validé')
+-- ON CONFLICT (telephone) DO NOTHING;

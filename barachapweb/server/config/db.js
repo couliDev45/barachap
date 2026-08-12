@@ -6,6 +6,7 @@
 
 import pg from "pg";
 import dotenv from "dotenv";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -22,11 +23,11 @@ const pool = new Pool({
 });
 
 pool.on("connect", () => {
-  console.log("Connecté avec succès à la base de données PostgreSQL BaraChap.");
+  logger.info("Connecté avec succès à la base de données PostgreSQL BaraChap.");
 });
 
 pool.on("error", (err) => {
-  console.error("Erreur inattendue sur la base de données PostgreSQL :", err);
+  logger.error("Erreur inattendue sur la base de données PostgreSQL :", err);
 });
 
 /**

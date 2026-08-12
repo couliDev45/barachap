@@ -4,6 +4,7 @@
  */
 
 import { Router } from "express";
+import logger from "../utils/logger.js";
 import { query } from "../config/db.js";
 
 const router = Router();
@@ -48,7 +49,7 @@ router.get("/prestataires", async (req, res) => {
     const result = await query(sql, params);
     res.json({ prestataires: result.rows });
   } catch (err) {
-    console.error("Erreur Récupération Prestataires :", err);
+    logger.error("Erreur Récupération Prestataires :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des prestataires." });
   }
 });
@@ -86,7 +87,7 @@ router.get("/prestataires/:id", async (req, res) => {
       realisations: realisationsResult.rows,
     });
   } catch (err) {
-    console.error("Erreur Profil Prestataire :", err);
+    logger.error("Erreur Profil Prestataire :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération du profil." });
   }
 });
