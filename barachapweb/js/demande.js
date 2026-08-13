@@ -20,8 +20,29 @@ import {
 import { requeteAPI } from "./api.js";
 
 const demandeForm = document.querySelector("#demandeForm");
+const demandeFormTitre = document.querySelector("#demandeFormTitre");
+const gateConnexion = document.querySelector("#gateConnexion");
 const message = document.querySelector("#message");
 const dateInput = document.querySelector("#date");
+
+// Barrière de connexion : le formulaire n'est utile qu'à un utilisateur
+// connecté (le backend exige un JWT pour POST /api/demandes). On évite de
+// laisser quelqu'un remplir tout le formulaire pour échouer seulement à la
+// toute fin — on bloque avant, avec un retour automatique ici une fois
+// connecté ou inscrit (y compris le ?prestataireId= éventuel de l'URL).
+const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
+
+if (!utilisateurConnecte && gateConnexion) {
+  if (demandeFormTitre) demandeFormTitre.style.display = "none";
+  if (demandeForm) demandeForm.style.display = "none";
+  gateConnexion.style.display = "block";
+
+  const retour = encodeURIComponent(window.location.pathname.split("/").pop() + window.location.search);
+  const gateLienConnexion = document.querySelector("#gateLienConnexion");
+  const gateLienInscription = document.querySelector("#gateLienInscription");
+  if (gateLienConnexion) gateLienConnexion.href = `connexion.html?retour=${retour}`;
+  if (gateLienInscription) gateLienInscription.href = `inscription.html?retour=${retour}`;
+}
 
 if (dateInput) {
   dateInput.setAttribute("min", obtenirDateAujourdhui());
@@ -130,7 +151,9 @@ if (demandeForm) {
     if (submitButton) submitButton.disabled = false;
 
     if (!reponse) {
-      const messageErreur = lireStockage("utilisateurConnecte", null)
+      // Cas rare : la session a expiré pendant que le formulaire était rempli
+      // (la barrière en haut de fichier bloque déjà le cas non-connecté au départ)
+      const messageErreur = utilisateurConnecte
         ? "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer."
         : "Vous devez être connecté pour envoyer une demande.";
       afficherMessage(message, messageErreur, "error");

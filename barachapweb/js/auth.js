@@ -13,6 +13,17 @@
 import { afficherNotification, ecrireStockage } from "./utils.js";
 import { requeteAPI } from "./api.js";
 
+// Préserve ?retour= en changeant de page entre connexion et inscription,
+// pour ne pas perdre le fil si quelqu'un se trompe de formulaire en venant
+// de la barrière de connexion sur demande.html (voir demande.js).
+const retourActuel = new URLSearchParams(window.location.search).get("retour");
+if (retourActuel) {
+  const lienVersInscription = document.querySelector("#lienVersInscription");
+  const lienVersConnexion = document.querySelector("#lienVersConnexion");
+  if (lienVersInscription) lienVersInscription.href += `?retour=${retourActuel}`;
+  if (lienVersConnexion) lienVersConnexion.href += `?retour=${retourActuel}`;
+}
+
 // Gestion du formulaire d'inscription
 const inscriptionForm = document.querySelector("#inscriptionForm");
 const optClient = document.querySelector("#optClient");
@@ -108,9 +119,15 @@ if (inscriptionForm) {
 
     afficherNotification("Compte créé avec succès ! Redirection...", "success");
 
+    const retour = new URLSearchParams(window.location.search).get("retour");
+
     setTimeout(() => {
-      window.location.href =
-        roleRadio === "prestataire" ? "dashboard-prestataire.html" : "dashboard-client.html";
+      if (retour) {
+        window.location.href = decodeURIComponent(retour);
+      } else {
+        window.location.href =
+          roleRadio === "prestataire" ? "dashboard-prestataire.html" : "dashboard-client.html";
+      }
     }, 1200);
   });
 }
@@ -151,7 +168,13 @@ if (connexionForm) {
 
     afficherNotification("Connexion réussie ! Redirection en cours...", "success");
 
+    const retour = new URLSearchParams(window.location.search).get("retour");
+
     setTimeout(() => {
+      if (retour) {
+        window.location.href = decodeURIComponent(retour);
+        return;
+      }
       // Le rôle renvoyé par le serveur fait foi (plus fiable que le select,
       // au cas où l'utilisateur se trompe de type de compte)
       const roleServeur = reponse.user?.role || typeCompte;
