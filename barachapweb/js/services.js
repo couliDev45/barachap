@@ -5,10 +5,8 @@
  * - recherche par mot-clé (barre de recherche)
  * - filtrage par catégorie (boutons de filtre)
  *
- * Note : pas de photo ni de note affichées sur les cartes générées — il n'y
- * a ni upload de photo ni système d'avis côté backend pour l'instant. Les
- * cartes statiques de démonstration montraient des photos/notes fictives ;
- * mieux vaut ne rien afficher que d'inventer des données.
+ * Photo affichée uniquement si le prestataire l'a renseignée (voir
+ * prestataire.js) — pas de note affichée, aucun système d'avis côté backend.
  */
 
 import { requeteAPI } from "./api.js";
@@ -25,9 +23,13 @@ function echapperHTML(texte) {
 function construireCarte(prestataire) {
   const categorie = (prestataire.metier || "").toLowerCase();
   const ville = [prestataire.ville, prestataire.quartier].filter(Boolean).join(" - ");
+  const photo = prestataire.photo_url
+    ? `<img src="${prestataire.photo_url}" alt="${echapperHTML(prestataire.nom_complet)}" />`
+    : "";
 
   return `
     <div class="advantage-card" data-category="${echapperHTML(categorie)}">
+      ${photo}
       <h3>${echapperHTML(prestataire.nom_complet)}</h3>
       <p class="metier">${echapperHTML(prestataire.metier)}</p>
       <span>${echapperHTML(ville)}</span>

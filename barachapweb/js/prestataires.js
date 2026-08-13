@@ -9,8 +9,8 @@
  * surtout pour la catégorie "Taxi-moto / Chauffeur" qui doit correspondre
  * à deux métiers différents en base (Taxi-moto ET Chauffeur).
  *
- * Note : pas de photo ni de note affichées — pas d'upload de photo ni de
- * système d'avis côté backend pour l'instant.
+ * Photo affichée uniquement si le prestataire l'a renseignée (voir
+ * prestataire.js) — pas de note affichée, aucun système d'avis côté backend.
  */
 
 import { requeteAPI } from "./api.js";
@@ -43,9 +43,13 @@ function construireCarte(prestataire) {
   const ville = normaliser(prestataire.ville);
   const quartier = normaliser(prestataire.quartier);
   const villeAffichee = [prestataire.ville, prestataire.quartier].filter(Boolean).join(" - ");
+  const photo = prestataire.photo_url
+    ? `<img src="${prestataire.photo_url}" alt="${echapperHTML(prestataire.nom_complet)}" />`
+    : "";
 
   return `
     <div class="advantage-card" data-category="${categorie}" data-ville="${ville}" data-quartier="${quartier}">
+      ${photo}
       <h3>${echapperHTML(prestataire.nom_complet)}</h3>
       <p class="metier">${echapperHTML(prestataire.metier)}</p>
       <span>${echapperHTML(villeAffichee)}</span>

@@ -5,11 +5,12 @@
  * construisent ce lien depuis les cartes de résultats).
  * Route utilisée : GET /api/users/prestataires/:id (publique, pas de JWT requis).
  *
+ * bio et photo_url viennent de PUT /api/users/me (voir prestataire.js) — si le
+ * prestataire ne les a pas encore renseignés, on retombe sur une phrase
+ * générique et l'image d'exemple du gabarit plutôt que de rien afficher.
+ *
  * Sections non connectées, faute de données correspondantes côté backend :
  * - La note (rating-badge) et les avis clients : aucune table d'avis n'existe.
- * - Le texte "À propos" : aucun champ bio/description sur la table users,
- *   remplacé par une phrase générique construite à partir des vraies données
- *   (nom, métier, ville) plutôt que par un texte inventé.
  */
 
 import { requeteAPI } from "./api.js";
@@ -21,6 +22,7 @@ if (profilNom) {
   const urlParams = new URLSearchParams(window.location.search);
   const prestataireId = urlParams.get("id");
 
+  const profilPhoto = document.querySelector("#profilPhoto");
   const profilMetier = document.querySelector("#profilMetier");
   const profilVille = document.querySelector("#profilVille");
   const profilApropos = document.querySelector("#profilApropos");
@@ -56,8 +58,11 @@ if (profilNom) {
     profilNom.textContent = prestataire.nom_complet;
     if (profilMetier) profilMetier.textContent = prestataire.metier || "";
     if (profilVille) profilVille.textContent = villeAffichee;
+    if (profilPhoto && prestataire.photo_url) profilPhoto.src = prestataire.photo_url;
     if (profilApropos) {
-      profilApropos.textContent = `${prestataire.nom_complet} propose des services de ${prestataire.metier || "prestation"} à ${villeAffichee || "proximité"}.`;
+      profilApropos.textContent =
+        prestataire.bio?.trim() ||
+        `${prestataire.nom_complet} propose des services de ${prestataire.metier || "prestation"} à ${villeAffichee || "proximité"}.`;
     }
     if (profilDemandeLink) {
       profilDemandeLink.href = `demande.html?prestataireId=${prestataire.id}`;
@@ -89,3 +94,4 @@ if (profilNom) {
 
   chargerProfil();
 }
+

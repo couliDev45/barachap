@@ -4,16 +4,15 @@
  * - message de bienvenue et statistiques réelles (demandes reçues, publications)
  * - chargement des demandes reçues (GET /api/demandes)
  * - acceptation et refus des demandes (PUT /api/demandes/:id)
- * - chargement des services déjà publiés (GET /api/users/prestataires/:id)
- * Dépend de utils.js (afficherNotification, lireStockage) et api.js (requeteAPI).
- *
- * ⚠️ "Ajouter un service" / "Publier une réalisation" restent locaux
- * (prompt()) : le backend n'a pas encore de route POST pour créer un
- * service ou une réalisation.
+ * - édition du profil : bio, photo, ville, quartier (PUT /api/users/me)
+ * - services : création (POST /api/services) et suppression (DELETE /api/services/:id)
+ * - réalisations : publication (POST /api/realisations) et suppression (DELETE /api/realisations/:id)
+ * Dépend de utils.js, api.js (requeteAPI) et cloudinary.js (uploaderImage).
  */
 
-import { afficherNotification, lireStockage } from "./utils.js";
+import { afficherNotification, lireStockage, ecrireStockage } from "./utils.js";
 import { requeteAPI } from "./api.js";
+import { uploaderImage } from "./cloudinary.js";
 
 function echapperHTML(texte) {
   const div = document.createElement("div");
@@ -108,10 +107,35 @@ if (tableDemandesRecues) {
   });
 }
 
-// --- Services publiés (lecture seule pour l'instant) ---
+// --- Services et réalisations : chargement commun ---
 
 const mesServicesActifs = document.querySelector("#mesServicesActifs");
+const mesRealisations = document.querySelector("#mesRealisations");
 const statPublications = document.querySelector("#prestatairePublications");
+
+function construireCarteService(service) {
+  return `
+    <div class="service-card" data-id="${service.id}">
+      <h3>${echapperHTML(service.titre)}</h3>
+      <p>${echapperHTML(service.description || "")}</p>
+      ${service.tarif_indicatif ? `<p><strong>${echapperHTML(service.tarif_indicatif)}</strong></p>` : ""}
+      <button class="btn-delete btn-supprimer-service" style="margin-top: 10px;">Supprimer</button>
+    </div>
+  `;
+}
+
+function construireRealisation(realisation) {
+  const image = realisation.photo_url
+    ? `<img src="${realisation.photo_url}" alt="${echapperHTML(realisation.titre)}" />`
+    : "";
+  return `
+    <div data-id="${realisation.id}" style="position: relative;">
+      ${image}
+      <p style="margin-top: 6px; font-size: 14px;">${echapperHTML(realisation.titre)}</p>
+      <button class="btn-delete btn-supprimer-realisation" style="font-size: 12px;">Supprimer</button>
+    </div>
+  `;
+}
 
 async function chargerServicesEtRealisations() {
   if (!utilisateurConnecte?.id) return;
@@ -124,43 +148,247 @@ async function chargerServicesEtRealisations() {
 
   if (mesServicesActifs) {
     mesServicesActifs.innerHTML = services.length
-      ? services
-          .map(
-            (s) => `
-        <div class="service-card">
-          <h3>${echapperHTML(s.titre)}</h3>
-          <p>${echapperHTML(s.description || "")}</p>
-        </div>
-      `,
-          )
-          .join("")
+      ? services.map(construireCarteService).join("")
       : `<p>Aucun service publié pour le moment. Utilisez "Ajouter un service" pour commencer.</p>`;
+  }
+
+  if (mesRealisations) {
+    mesRealisations.innerHTML = realisations.length
+      ? realisations.map(construireRealisation).join("")
+      : `<p>Aucune réalisation publiée pour le moment.</p>`;
   }
 }
 
-chargerServicesEtRealisations();
+if (mesServicesActifs || mesRealisations) {
+  chargerServicesEtRealisations();
+}
 
-// Ajout rapide de service
-// ⚠️ Aucune route backend (POST /api/services) n'est disponible pour le
-// moment : l'ajout reste local à l'affichage (non persisté en base).
-const btnAddService = document.querySelector("#btnAddService");
-if (btnAddService) {
-  btnAddService.addEventListener("click", () => {
-    const nomService = prompt("Entrez le titre du nouveau service (ex: Débouchage évier) :");
-    if (nomService && nomService.trim()) {
-      afficherNotification(`Le service "${nomService.trim()}" a bien été ajouté à votre profil.`, "success");
+// Suppression d'un service ou d'une réalisation (délégation sur tout le document,
+// puisque les cartes sont regénérées à chaque chargement)
+document.addEventListener("click", async (e) => {
+  const btnService = e.target.closest(".btn-supprimer-service");
+  const btnRealisation = e.target.closest(".btn-supprimer-realisation");
+  if (!btnService && !btnRealisation) return;
+
+  const carte = (btnService || btnRealisation).closest("[data-id]");
+  const id = carte?.dataset.id;
+  if (!id) return;
+
+  if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
+
+  const endpoint = btnService ? `/services/${id}` : `/realisations/${id}`;
+  const reponse = await requeteAPI(endpoint, { method: "DELETE" });
+
+  if (!reponse) {
+    afficherNotification("Impossible de supprimer pour le moment.", "error");
+    return;
+  }
+
+  afficherNotification("Supprimé avec succès.", "success");
+  chargerServicesEtRealisations();
+});
+
+// --- Bascule d'affichage des 3 formulaires (profil / service / réalisation) ---
+// Un seul formulaire ouvert à la fois pour ne pas surcharger la page.
+
+const sections = {
+  profil: document.querySelector("#editProfilSection"),
+  service: document.querySelector("#formAddService"),
+  realisation: document.querySelector("#formAddRealisation"),
+};
+
+function basculerSection(cle) {
+  const cible = sections[cle];
+  if (!cible) return;
+  const estOuvert = cible.style.display === "block";
+
+  Object.values(sections).forEach((el) => {
+    if (el) el.style.display = "none";
+  });
+
+  if (!estOuvert) cible.style.display = "block";
+}
+
+// --- Édition du profil ---
+
+const btnToggleProfil = document.querySelector("#btnToggleProfil");
+const profilPhotoInput = document.querySelector("#profilPhotoInput");
+const profilPhotoApercu = document.querySelector("#profilPhotoApercu");
+const profilPhotoStatut = document.querySelector("#profilPhotoStatut");
+const profilBioInput = document.querySelector("#profilBioInput");
+const profilVilleInput = document.querySelector("#profilVilleInput");
+const profilQuartierInput = document.querySelector("#profilQuartierInput");
+const profilEditMessage = document.querySelector("#profilEditMessage");
+const btnSauverProfil = document.querySelector("#btnSauverProfil");
+
+let photoSelectionnee = null;
+
+if (btnToggleProfil) {
+  btnToggleProfil.addEventListener("click", async () => {
+    basculerSection("profil");
+
+    // Pré-remplit avec les données actuelles à l'ouverture
+    if (sections.profil?.style.display === "block") {
+      const reponse = await requeteAPI("/auth/me");
+      const user = reponse?.user;
+      if (user) {
+        if (profilBioInput) profilBioInput.value = user.bio || "";
+        if (profilVilleInput) profilVilleInput.value = user.ville || "";
+        if (profilQuartierInput) profilQuartierInput.value = user.quartier || "";
+        if (profilPhotoApercu && user.photo_url) profilPhotoApercu.src = user.photo_url;
+      }
     }
   });
 }
 
-// Publication de réalisation
-// ⚠️ Même limitation : aucune route backend (POST /api/realisations) fournie.
-const btnAddRealisation = document.querySelector("#btnAddRealisation");
-if (btnAddRealisation) {
-  btnAddRealisation.addEventListener("click", () => {
-    const nomRealisation = prompt("Entrez le titre de votre réalisation :");
-    if (nomRealisation && nomRealisation.trim()) {
-      afficherNotification(`La réalisation "${nomRealisation.trim()}" a été publiée avec succès.`, "success");
+if (profilPhotoInput) {
+  profilPhotoInput.addEventListener("change", () => {
+    photoSelectionnee = profilPhotoInput.files[0] || null;
+    if (photoSelectionnee && profilPhotoApercu) {
+      profilPhotoApercu.src = URL.createObjectURL(photoSelectionnee);
     }
+  });
+}
+
+if (btnSauverProfil) {
+  btnSauverProfil.addEventListener("click", async () => {
+    btnSauverProfil.disabled = true;
+
+    let photoUrl = null;
+    if (photoSelectionnee) {
+      if (profilPhotoStatut) profilPhotoStatut.textContent = "Envoi de la photo...";
+      photoUrl = await uploaderImage(photoSelectionnee);
+      if (profilPhotoStatut) {
+        profilPhotoStatut.textContent = photoUrl
+          ? ""
+          : "Photo non envoyée (Cloudinary non configuré) — le reste du profil sera quand même enregistré.";
+      }
+    }
+
+    const reponse = await requeteAPI("/users/me", {
+      method: "PUT",
+      body: JSON.stringify({
+        bio: profilBioInput?.value.trim() || "",
+        photoUrl,
+        ville: profilVilleInput?.value.trim() || null,
+        quartier: profilQuartierInput?.value.trim() || null,
+      }),
+    });
+
+    btnSauverProfil.disabled = false;
+
+    if (!reponse?.user) {
+      if (profilEditMessage) profilEditMessage.textContent = "Erreur lors de l'enregistrement.";
+      afficherNotification("Impossible d'enregistrer le profil pour le moment.", "error");
+      return;
+    }
+
+    // Met à jour l'utilisateur stocké localement (greeting, etc.)
+    ecrireStockage("utilisateurConnecte", reponse.user);
+    photoSelectionnee = null;
+
+    afficherNotification("Profil mis à jour avec succès.", "success");
+    basculerSection("profil");
+  });
+}
+
+// --- Ajout de service ---
+
+const btnAddService = document.querySelector("#btnAddService");
+const serviceTitreInput = document.querySelector("#serviceTitreInput");
+const serviceDescriptionInput = document.querySelector("#serviceDescriptionInput");
+const serviceTarifInput = document.querySelector("#serviceTarifInput");
+const serviceFormMessage = document.querySelector("#serviceFormMessage");
+const btnValiderService = document.querySelector("#btnValiderService");
+
+if (btnAddService) {
+  btnAddService.addEventListener("click", () => basculerSection("service"));
+}
+
+if (btnValiderService) {
+  btnValiderService.addEventListener("click", async () => {
+    const titre = serviceTitreInput?.value.trim();
+    if (!titre) {
+      if (serviceFormMessage) serviceFormMessage.textContent = "Le titre est obligatoire.";
+      return;
+    }
+
+    btnValiderService.disabled = true;
+
+    const reponse = await requeteAPI("/services", {
+      method: "POST",
+      body: JSON.stringify({
+        titre,
+        description: serviceDescriptionInput?.value.trim() || null,
+        tarifIndicatif: serviceTarifInput?.value.trim() || null,
+      }),
+    });
+
+    btnValiderService.disabled = false;
+
+    if (!reponse?.service) {
+      if (serviceFormMessage) serviceFormMessage.textContent = "Erreur lors de la publication.";
+      return;
+    }
+
+    if (serviceTitreInput) serviceTitreInput.value = "";
+    if (serviceDescriptionInput) serviceDescriptionInput.value = "";
+    if (serviceTarifInput) serviceTarifInput.value = "";
+    if (serviceFormMessage) serviceFormMessage.textContent = "";
+
+    afficherNotification(`Le service "${titre}" a bien été ajouté à votre profil.`, "success");
+    basculerSection("service");
+    chargerServicesEtRealisations();
+  });
+}
+
+// --- Publication de réalisation ---
+
+const btnAddRealisation = document.querySelector("#btnAddRealisation");
+const realisationTitreInput = document.querySelector("#realisationTitreInput");
+const realisationPhotoInput = document.querySelector("#realisationPhotoInput");
+const realisationFormMessage = document.querySelector("#realisationFormMessage");
+const btnValiderRealisation = document.querySelector("#btnValiderRealisation");
+
+if (btnAddRealisation) {
+  btnAddRealisation.addEventListener("click", () => basculerSection("realisation"));
+}
+
+if (btnValiderRealisation) {
+  btnValiderRealisation.addEventListener("click", async () => {
+    const titre = realisationTitreInput?.value.trim();
+    if (!titre) {
+      if (realisationFormMessage) realisationFormMessage.textContent = "Le titre est obligatoire.";
+      return;
+    }
+
+    btnValiderRealisation.disabled = true;
+
+    let photoUrl = null;
+    const fichier = realisationPhotoInput?.files[0];
+    if (fichier) {
+      if (realisationFormMessage) realisationFormMessage.textContent = "Envoi de la photo...";
+      photoUrl = await uploaderImage(fichier);
+    }
+
+    const reponse = await requeteAPI("/realisations", {
+      method: "POST",
+      body: JSON.stringify({ titre, photoUrl }),
+    });
+
+    btnValiderRealisation.disabled = false;
+
+    if (!reponse?.realisation) {
+      if (realisationFormMessage) realisationFormMessage.textContent = "Erreur lors de la publication.";
+      return;
+    }
+
+    if (realisationTitreInput) realisationTitreInput.value = "";
+    if (realisationPhotoInput) realisationPhotoInput.value = "";
+    if (realisationFormMessage) realisationFormMessage.textContent = "";
+
+    afficherNotification(`La réalisation "${titre}" a été publiée avec succès.`, "success");
+    basculerSection("realisation");
+    chargerServicesEtRealisations();
   });
 }
