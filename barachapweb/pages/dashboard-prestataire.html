@@ -41,7 +41,7 @@
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
         <a href="dashboard-prestataire.html" style="color: var(--orange-primary);">Mon Espace</a>
-        <a href="connexion.html" class="btn-primary">Déconnexion</a>
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
       </nav>
     </header>
 
@@ -75,9 +75,63 @@
         </div>
 
         <div class="dashboard-actions" style="justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-          <a href="profil.html" class="btn-primary" style="text-decoration: none;">Modifier profil</a>
+          <button class="btn-primary" id="btnToggleProfil">Modifier profil</button>
           <button class="btn-primary" id="btnAddService">Ajouter un service</button>
           <button class="btn-primary" id="btnAddRealisation">Publier une réalisation</button>
+        </div>
+
+        <!-- Édition du profil (bio, photo, ville/quartier) — masqué par défaut -->
+        <div id="editProfilSection" class="demande-form" style="display: none; max-width: 700px; margin: 0 auto 40px;">
+          <h3 style="margin-bottom: 20px;">Mon profil</h3>
+
+          <label for="profilPhotoInput">Photo de profil</label>
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+            <img
+              id="profilPhotoApercu"
+              src="../assets/logo/favicon-192.png"
+              alt="Aperçu photo de profil"
+              style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;"
+            />
+            <input type="file" id="profilPhotoInput" accept="image/*" />
+          </div>
+          <p id="profilPhotoStatut" style="font-size: 13px; color: #999; margin-bottom: 16px;"></p>
+
+          <label for="profilBioInput">À propos</label>
+          <textarea id="profilBioInput" rows="4" placeholder="Présentez votre activité, votre expérience..."></textarea>
+
+          <label for="profilVilleInput">Ville</label>
+          <input type="text" id="profilVilleInput" placeholder="Ex: Abidjan" />
+
+          <label for="profilQuartierInput">Quartier</label>
+          <input type="text" id="profilQuartierInput" placeholder="Ex: Cocody" />
+
+          <div id="profilEditMessage"></div>
+
+          <button class="btn-primary" id="btnSauverProfil" type="button">Enregistrer</button>
+        </div>
+
+        <!-- Formulaire d'ajout de service — masqué par défaut -->
+        <div id="formAddService" class="demande-form" style="display: none; max-width: 700px; margin: 0 auto 40px;">
+          <h3 style="margin-bottom: 20px;">Nouveau service</h3>
+          <label for="serviceTitreInput">Titre</label>
+          <input type="text" id="serviceTitreInput" placeholder="Ex: Débouchage évier" />
+          <label for="serviceDescriptionInput">Description</label>
+          <textarea id="serviceDescriptionInput" rows="3" placeholder="Décrivez ce service"></textarea>
+          <label for="serviceTarifInput">Tarif indicatif (facultatif)</label>
+          <input type="text" id="serviceTarifInput" placeholder="Ex: À partir de 5000 FCFA" />
+          <div id="serviceFormMessage"></div>
+          <button class="btn-primary" id="btnValiderService" type="button">Publier ce service</button>
+        </div>
+
+        <!-- Formulaire de publication de réalisation — masqué par défaut -->
+        <div id="formAddRealisation" class="demande-form" style="display: none; max-width: 700px; margin: 0 auto 40px;">
+          <h3 style="margin-bottom: 20px;">Nouvelle réalisation</h3>
+          <label for="realisationTitreInput">Titre</label>
+          <input type="text" id="realisationTitreInput" placeholder="Ex: Installation sanitaire Villa Cocody" />
+          <label for="realisationPhotoInput">Photo (facultatif)</label>
+          <input type="file" id="realisationPhotoInput" accept="image/*" />
+          <div id="realisationFormMessage"></div>
+          <button class="btn-primary" id="btnValiderRealisation" type="button">Publier cette réalisation</button>
         </div>
 
         <div class="section-title" style="margin-bottom: 20px; text-align: left;">
@@ -158,6 +212,12 @@
             <p>Débouchage haute pression des canalisations bouchées</p>
           </div>
         </div>
+
+        <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+          <h3>Mes réalisations</h3>
+        </div>
+
+        <div class="galerie" id="mesRealisations" style="margin-bottom: 40px;"></div>
       </section>
     </main>
 
