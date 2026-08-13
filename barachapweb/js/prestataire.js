@@ -33,6 +33,17 @@ if (prestataireGreeting && utilisateurConnecte?.nom_complet) {
 const tableDemandesRecues = document.querySelector("#tableDemandesRecues");
 const statDemandesRecues = document.querySelector("#prestataireDemandesRecues");
 
+// Normalise un numéro ivoirien en format international pour le lien WhatsApp
+// (wa.me exige des chiffres uniquement, sans le 0 initial, préfixés par 225).
+// Meilleur effort : le champ téléphone du formulaire de demande n'impose
+// aucun format précis à la saisie.
+function normaliserPourWhatsApp(telephone) {
+  const chiffres = (telephone || "").replace(/\D/g, "");
+  if (chiffres.startsWith("225")) return chiffres;
+  if (chiffres.startsWith("0")) return "225" + chiffres.slice(1);
+  return "225" + chiffres;
+}
+
 function construireLigneDemande(demande) {
   const statutBrut = (demande.statut || "").toLowerCase();
   const estAcceptee = statutBrut.includes("accept");
@@ -40,8 +51,10 @@ function construireLigneDemande(demande) {
   const classeStatut = estAcceptee ? "acceptee" : estRefusee ? "refusee" : "attente";
   const labelStatut = estAcceptee ? "Acceptée" : estRefusee ? "Refusée" : "En attente";
 
+  const telephoneClient = demande.telephone_client || "";
   const actionsHTML = estAcceptee
-    ? `<button class="btn-secondary">Contacter</button>`
+    ? `<a class="btn-secondary" href="tel:${telephoneClient}" style="text-decoration: none;">Appeler</a>
+       <a class="btn-secondary" href="https://wa.me/${normaliserPourWhatsApp(telephoneClient)}" target="_blank" rel="noopener" style="text-decoration: none;">WhatsApp</a>`
     : estRefusee
       ? `<span style="font-size: 13px; color: #999;">Refusée</span>`
       : `<button class="btn-success btn-accepter">Accepter</button>
@@ -51,7 +64,7 @@ function construireLigneDemande(demande) {
 
   return `
     <tr data-id="${demande.id}">
-      <td><strong>${echapperHTML(demande.nom_client)} ${echapperHTML(demande.prenom_client)}</strong><br /><small>${echapperHTML(demande.telephone_client)}</small></td>
+      <td><strong>${echapperHTML(demande.nom_client)} ${echapperHTML(demande.prenom_client)}</strong><br /><small>${echapperHTML(telephoneClient)}</small></td>
       <td>${echapperHTML(demande.prestation)}</td>
       <td>${echapperHTML(demande.ville)}</td>
       <td>${dateSouhaitee}</td>
