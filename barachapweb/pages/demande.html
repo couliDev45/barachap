@@ -44,7 +44,21 @@
       <section class="form-section">
         <div class="form-content">
           <a href="profil.html" class="btn-primary retour-btn">Retour</a>
-          <h2>Demande de service</h2>
+
+          <!-- Barrière de connexion : affichée à la place du formulaire tant
+               que l'utilisateur n'est pas connecté (voir demande.js) -->
+          <div id="gateConnexion" class="demande-form" style="display: none; text-align: center;">
+            <h2>Connectez-vous pour envoyer votre demande</h2>
+            <p style="margin-bottom: 24px;">
+              Un compte est nécessaire pour qu'un prestataire puisse vous recontacter et suivre votre demande.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+              <a href="connexion.html" id="gateLienConnexion" class="btn-primary" style="text-decoration: none;">Se connecter</a>
+              <a href="inscription.html" id="gateLienInscription" class="btn-primary" style="text-decoration: none;">Créer un compte</a>
+            </div>
+          </div>
+
+          <h2 id="demandeFormTitre">Demande de service</h2>
           <form class="demande-form" id="demandeForm">
             <label for="prestation">Type de prestation</label>
             <select name="prestation" id="prestation" required>
