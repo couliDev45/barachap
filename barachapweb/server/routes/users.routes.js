@@ -4,8 +4,8 @@
  */
 
 import { Router } from "express";
-import logger from "../utils/logger.js";
 import { query } from "../config/db.js";
+import { verifierToken } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.get("/prestataires", async (req, res) => {
 
   try {
     let sql = `
-      SELECT id, nom_complet, telephone, email, metier, ville, quartier, statut_validation, created_at
+      SELECT id, nom_complet, telephone, email, metier, ville, quartier, bio, photo_url, statut_validation, created_at
       FROM users
       WHERE role = 'prestataire' AND statut_validation = 'Validé'
     `;
@@ -49,7 +49,7 @@ router.get("/prestataires", async (req, res) => {
     const result = await query(sql, params);
     res.json({ prestataires: result.rows });
   } catch (err) {
-    logger.error("Erreur Récupération Prestataires :", err);
+    console.error("Erreur Récupération Prestataires :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des prestataires." });
   }
 });
@@ -63,7 +63,7 @@ router.get("/prestataires/:id", async (req, res) => {
 
   try {
     const userResult = await query(
-      "SELECT id, nom_complet, telephone, email, metier, ville, quartier, created_at FROM users WHERE id = $1 AND role = 'prestataire'",
+      "SELECT id, nom_complet, telephone, email, metier, ville, quartier, bio, photo_url, created_at FROM users WHERE id = $1 AND role = 'prestataire'",
       [id]
     );
 
@@ -87,8 +87,42 @@ router.get("/prestataires/:id", async (req, res) => {
       realisations: realisationsResult.rows,
     });
   } catch (err) {
-    logger.error("Erreur Profil Prestataire :", err);
+    console.error("Erreur Profil Prestataire :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération du profil." });
+  }
+});
+
+/**
+ * PUT /api/users/me
+ * Met à jour le profil de l'utilisateur connecté (bio, photo, ville, quartier).
+ * Seuls les champs fournis sont modifiés — envoyer un champ vide ("") l'efface
+ * explicitement, ne pas l'envoyer du tout laisse la valeur actuelle inchangée.
+ */
+router.put("/me", verifierToken, async (req, res) => {
+  const { bio, photoUrl, ville, quartier } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const result = await query(
+      `UPDATE users SET
+        bio = COALESCE($1, bio),
+        photo_url = COALESCE($2, photo_url),
+        ville = COALESCE($3, ville),
+        quartier = COALESCE($4, quartier),
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5
+       RETURNING id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at`,
+      [bio ?? null, photoUrl ?? null, ville ?? null, quartier ?? null, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    res.json({ message: "Profil mis à jour avec succès.", user: result.rows[0] });
+  } catch (err) {
+    console.error("Erreur Maj Profil :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la mise à jour du profil." });
   }
 });
 

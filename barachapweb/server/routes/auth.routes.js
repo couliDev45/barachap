@@ -8,10 +8,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { query } from "../config/db.js";
 import { verifierToken } from "../middleware/auth.js";
-import logger from "../utils/logger.js";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "barachap_super_secret_key_2026";
 
 /**
  * POST /api/auth/register
@@ -41,7 +40,7 @@ router.post("/register", async (req, res) => {
     const newUser = await query(
       `INSERT INTO users (nom_complet, telephone, email, password_hash, role, metier, ville, quartier, statut_validation)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, nom_complet, telephone, email, role, metier, ville, quartier, statut_validation, created_at`,
+       RETURNING id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at`,
       [nomComplet, telephone, email || null, passwordHash, userRole, metier || null, ville || "Abidjan", quartier || null, statutValidation]
     );
 
@@ -60,7 +59,7 @@ router.post("/register", async (req, res) => {
       user,
     });
   } catch (err) {
-    logger.error("Erreur Inscription :", err);
+    console.error("Erreur Inscription :", err);
     res.status(500).json({ message: "Erreur serveur lors de l'inscription." });
   }
 });
@@ -110,7 +109,7 @@ router.post("/login", async (req, res) => {
       user,
     });
   } catch (err) {
-    logger.error("Erreur Connexion :", err);
+    console.error("Erreur Connexion :", err);
     res.status(500).json({ message: "Erreur serveur lors de la connexion." });
   }
 });
@@ -122,7 +121,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", verifierToken, async (req, res) => {
   try {
     const result = await query(
-      "SELECT id, nom_complet, telephone, email, role, metier, ville, quartier, statut_validation, created_at FROM users WHERE id = $1",
+      "SELECT id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
 
@@ -132,7 +131,7 @@ router.get("/me", verifierToken, async (req, res) => {
 
     res.json({ user: result.rows[0] });
   } catch (err) {
-    logger.error("Erreur Me :", err);
+    console.error("Erreur Me :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération du profil." });
   }
 });

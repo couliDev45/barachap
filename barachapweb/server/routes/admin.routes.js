@@ -1,13 +1,17 @@
 /**
  * admin.routes.js
  * Routes réservées à l'administration de la plateforme BaraChap.
+ * Toutes les routes exigent un JWT valide ET le rôle "admin".
  */
 
 import { Router } from "express";
-import logger from "../utils/logger.js";
 import { query } from "../config/db.js";
+import { verifierToken, verifierAdmin } from "../middleware/auth.js";
 
 const router = Router();
+
+// Applique la vérification à toutes les routes de ce fichier
+router.use(verifierToken, verifierAdmin);
 
 /**
  * GET /api/admin/pending
@@ -21,7 +25,7 @@ router.get("/pending", async (req, res) => {
 
     res.json({ pendingPrestataires: result.rows });
   } catch (err) {
-    logger.error("Erreur Admin Pending :", err);
+    console.error("Erreur Admin Pending :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des validations." });
   }
 });
@@ -51,7 +55,7 @@ router.put("/validate/:id", async (req, res) => {
       prestataire: result.rows[0],
     });
   } catch (err) {
-    logger.error("Erreur Admin Validate :", err);
+    console.error("Erreur Admin Validate :", err);
     res.status(500).json({ message: "Erreur serveur lors de la validation." });
   }
 });
@@ -68,7 +72,7 @@ router.get("/users", async (req, res) => {
 
     res.json({ users: result.rows });
   } catch (err) {
-    logger.error("Erreur Admin Users :", err);
+    console.error("Erreur Admin Users :", err);
     res.status(500).json({ message: "Erreur serveur lors de la récupération des utilisateurs." });
   }
 });
@@ -95,8 +99,87 @@ router.post("/categories", async (req, res) => {
       categorie: result.rows[0],
     });
   } catch (err) {
-    logger.error("Erreur Admin Category :", err);
+    console.error("Erreur Admin Category :", err);
     res.status(500).json({ message: "Erreur serveur lors de la création de la catégorie." });
+  }
+});
+
+/**
+ * GET /api/admin/categories
+ * Liste toutes les catégories existantes.
+ * (Route ajoutée — absente du backend d'origine, nécessaire pour que le
+ * frontend affiche les vraies catégories au lieu d'une liste locale qui
+ * repart de zéro à chaque rechargement de page.)
+ */
+router.get("/categories", async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT c.id, c.nom, c.description,
+              (SELECT COUNT(*) FROM services s WHERE s.categorie_id = c.id) AS nombre_prestataires
+       FROM categories c
+       ORDER BY c.nom ASC`
+    );
+
+    res.json({ categories: result.rows });
+  } catch (err) {
+    console.error("Erreur Admin Liste Categories :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération des catégories." });
+  }
+});
+
+/**
+ * DELETE /api/admin/categories/:id
+ * Supprime une catégorie.
+ * (Route ajoutée — absente du backend d'origine.)
+ */
+router.delete("/categories/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await query("DELETE FROM categories WHERE id = $1 RETURNING *", [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Catégorie non trouvée." });
+    }
+
+    res.json({ message: "Catégorie supprimée avec succès." });
+  } catch (err) {
+    console.error("Erreur Admin Suppression Categorie :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la suppression de la catégorie." });
+  }
+});
+
+/**
+ * PUT /api/admin/users/:id/suspend
+ * Suspend ou réactive un utilisateur.
+ * (Route ajoutée — absente du backend d'origine. Réutilise la colonne
+ * statut_validation existante avec la valeur 'Suspendu' plutôt que
+ * d'ajouter une colonne, pour rester compatible avec le schéma actuel.)
+ */
+router.put("/users/:id/suspend", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const userActuel = await query("SELECT statut_validation FROM users WHERE id = $1", [id]);
+
+    if (userActuel.rows.length === 0) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    const nouveauStatut = userActuel.rows[0].statut_validation === "Suspendu" ? "Validé" : "Suspendu";
+
+    const result = await query(
+      "UPDATE users SET statut_validation = $1 WHERE id = $2 RETURNING id, nom_complet, statut_validation",
+      [nouveauStatut, id]
+    );
+
+    res.json({
+      message: `${result.rows[0].nom_complet} est maintenant "${nouveauStatut}".`,
+      user: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Erreur Admin Suspension Utilisateur :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la suspension." });
   }
 });
 
@@ -120,7 +203,7 @@ router.get("/stats", async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error("Erreur Admin Stats :", err);
+    console.error("Erreur Admin Stats :", err);
     res.status(500).json({ message: "Erreur serveur lors du calcul des statistiques." });
   }
 });
