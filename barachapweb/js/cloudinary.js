@@ -17,8 +17,8 @@
  * les champs texte, seule la photo ne sera pas jointe.
  */
 
-const CLOUDINARY_CLOUD_NAME = "VOTRE_CLOUD_NAME"; // à remplacer
-const CLOUDINARY_UPLOAD_PRESET = "VOTRE_UPLOAD_PRESET"; // à remplacer
+const CLOUDINARY_CLOUD_NAME = "ydfqdm6d"; // à remplacer
+const CLOUDINARY_UPLOAD_PRESET = "barachap"; // à remplacer
 
 /**
  * Envoie un fichier image à Cloudinary et retourne son URL publique.
@@ -28,18 +28,18 @@ const CLOUDINARY_UPLOAD_PRESET = "VOTRE_UPLOAD_PRESET"; // à remplacer
 export async function uploaderImage(fichier) {
   if (!fichier) return null;
 
-  if (CLOUDINARY_CLOUD_NAME === "VOTRE_CLOUD_NAME") {
+  if (CLOUDINARY_CLOUD_NAME === "ydfqdm6d") {
     console.warn("Cloudinary n'est pas configuré (voir js/cloudinary.js) — photo ignorée.");
     return null;
   }
 
   const formData = new FormData();
   formData.append("file", fichier);
-  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("upload_preset", barachap);
 
   try {
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${ydfqdm6d}/image/upload`,
       { method: "POST", body: formData },
     );
 
