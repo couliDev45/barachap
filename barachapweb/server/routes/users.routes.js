@@ -18,7 +18,9 @@ router.get("/prestataires", async (req, res) => {
 
   try {
     let sql = `
-      SELECT id, nom_complet, telephone, email, metier, ville, quartier, bio, photo_url, statut_validation, created_at
+      SELECT id, nom_complet, telephone, email, metier, ville, quartier, bio, photo_url, statut_validation, created_at,
+        (SELECT ROUND(AVG(note), 1) FROM avis WHERE avis.prestataire_id = users.id) AS note_moyenne,
+        (SELECT COUNT(*) FROM avis WHERE avis.prestataire_id = users.id) AS total_avis
       FROM users
       WHERE role = 'prestataire' AND statut_validation = 'Validé'
     `;

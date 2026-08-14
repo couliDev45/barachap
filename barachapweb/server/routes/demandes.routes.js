@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
   const { clientId, prestataireId } = req.query;
 
   try {
-    let sql = "SELECT * FROM demandes";
+    let sql = "SELECT demandes.*, EXISTS(SELECT 1 FROM avis WHERE avis.demande_id = demandes.id) AS a_avis FROM demandes";
     const params = [];
 
     if (role === "admin") {
@@ -127,6 +127,50 @@ router.put("/:id", async (req, res) => {
   } catch (err) {
     console.error("Erreur Maj Demande :", err);
     res.status(500).json({ message: "Erreur serveur lors de la mise à jour de la demande." });
+  }
+});
+
+/**
+ * PUT /api/demandes/:id/modifier
+ * Modifie le CONTENU complet d'une demande (prestation, coordonnées, date,
+ * ville...). Distincte de PUT /:id qui ne gère que le statut — celle-ci est
+ * réservée au client propriétaire de la demande (ou à un admin), jamais au
+ * prestataire, et ne touche jamais au statut.
+ */
+router.put("/:id/modifier", async (req, res) => {
+  const { id } = req.params;
+  const { id: userId, role } = req.user;
+  const { prestation, nom, prenom, telephone, besoin, date, ville } = req.body;
+
+  if (!prestation || !nom || !telephone || !besoin || !date || !ville) {
+    return res.status(400).json({ message: "Veuillez remplir tous les champs obligatoires." });
+  }
+
+  try {
+    const existante = await query("SELECT client_id FROM demandes WHERE id = $1", [id]);
+
+    if (existante.rows.length === 0) {
+      return res.status(404).json({ message: "Demande non trouvée." });
+    }
+
+    const estProprietaire = Number(existante.rows[0].client_id) === Number(userId);
+    if (role !== "admin" && !estProprietaire) {
+      return res.status(403).json({ message: "Vous n'êtes pas autorisé à modifier cette demande." });
+    }
+
+    const result = await query(
+      `UPDATE demandes SET
+        prestation = $1, nom_client = $2, prenom_client = $3,
+        telephone_client = $4, besoin = $5, date_souhaitee = $6, ville = $7
+       WHERE id = $8
+       RETURNING *`,
+      [prestation, nom, prenom || null, telephone, besoin, date, ville, id],
+    );
+
+    res.json({ message: "Demande modifiée avec succès.", demande: result.rows[0] });
+  } catch (err) {
+    console.error("Erreur Modification Demande :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la modification de la demande." });
   }
 });
 

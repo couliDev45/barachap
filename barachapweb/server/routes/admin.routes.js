@@ -208,4 +208,29 @@ router.get("/stats", async (req, res) => {
   }
 });
 
+/**
+ * PUT /api/admin/parametres/:cle
+ * Modifie un paramètre du site (ex: hero_image_url). Créé le paramètre s'il
+ * n'existe pas encore (upsert), donc utilisable même sans avoir fait tourner
+ * la migration d'insertion initiale.
+ */
+router.put("/parametres/:cle", async (req, res) => {
+  const { cle } = req.params;
+  const { valeur } = req.body;
+
+  try {
+    const result = await query(
+      `INSERT INTO parametres (cle, valeur, updated_at) VALUES ($1, $2, CURRENT_TIMESTAMP)
+       ON CONFLICT (cle) DO UPDATE SET valeur = $2, updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [cle, valeur],
+    );
+
+    res.json({ message: "Paramètre mis à jour avec succès.", parametre: result.rows[0] });
+  } catch (err) {
+    console.error("Erreur Maj Paramètre :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la mise à jour du paramètre." });
+  }
+});
+
 export default router;
