@@ -39,6 +39,10 @@
     {
       "src": "/dashboard-prestataire",
       "dest": "/pages/dashboard-prestataire.html"
+    },
+    {
+      "src": "/taxi-moto",
+      "dest": "/pages/taxi-moto.html"
     }
   ]
 }
