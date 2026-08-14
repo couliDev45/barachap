@@ -63,16 +63,38 @@
 
           <h2 id="courseFormTitre">Commander une moto</h2>
           <div class="demande-form" id="courseForm">
-            <label>Point de départ</label>
+            <label for="departAdresseInput">Point de départ</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input
+                type="text"
+                id="departAdresseInput"
+                placeholder="Tapez une adresse (ex: Marché central, Séguéla)"
+                style="flex: 1;"
+              />
+              <button type="button" class="btn-primary" id="btnRechercherDepart" style="white-space: nowrap;">
+                Rechercher
+              </button>
+            </div>
             <button type="button" class="btn-primary" id="btnMaPosition" style="margin-bottom: 12px;">
               📍 Utiliser ma position actuelle
             </button>
             <div id="carteDepart" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
             <p id="departAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
-              Cliquez sur la carte ou utilisez votre position actuelle.
+              Cliquez sur la carte, tapez une adresse, ou utilisez votre position actuelle.
             </p>
 
-            <label style="margin-top: 24px;">Destination</label>
+            <label for="destinationAdresseInput" style="margin-top: 24px;">Destination</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input
+                type="text"
+                id="destinationAdresseInput"
+                placeholder="Tapez une adresse (ex: Gare routière, Séguéla)"
+                style="flex: 1;"
+              />
+              <button type="button" class="btn-primary" id="btnRechercherDestination" style="white-space: nowrap;">
+                Rechercher
+              </button>
+            </div>
             <div id="carteDestination" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
             <p id="destinationAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
               Cliquez sur la carte pour indiquer où vous allez.
