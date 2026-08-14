@@ -2,13 +2,16 @@
  * demande.js
  * Gère le formulaire de demande de service :
  * - pré-remplissage en mode modification
- * - validation et soumission via l'API (POST /api/demandes)
+ * - validation et soumission via l'API (POST /api/demandes, ou
+ *   PUT /api/demandes/:id/modifier en mode édition)
  * - date minimale (empêche de choisir une date passée)
  * - récupère un ?prestataireId= dans l'URL si on arrive depuis un profil
  *   prestataire (voir profil.js), pour cibler directement la demande
+ * - barrière de connexion : redirige vers connexion/inscription si non
+ *   connecté, avec retour automatique ici une fois authentifié
  *
  * Note : le champ #photo du formulaire n'est pas envoyé — la route backend
- * POST /api/demandes n'accepte pas encore de fichier/upload.
+ * n'accepte pas encore de fichier/upload.
  */
 
 import {
@@ -131,14 +134,8 @@ if (demandeForm) {
 
     let reponse;
     if (enModeModification) {
-      // Le backend n'expose qu'une mise à jour du statut (PUT /api/demandes/:id),
-      // pas une modification complète du contenu (nom, date, ville, besoin...).
-      // En attendant une vraie route de mise à jour côté serveur, on recrée la
-      // demande avec les nouvelles valeurs (suppression de l'ancienne + création
-      // d'une nouvelle) pour que les modifications soient réellement appliquées.
-      await requeteAPI(`/demandes/${demandeEnCours.id}`, { method: "DELETE" });
-      reponse = await requeteAPI("/demandes", {
-        method: "POST",
+      reponse = await requeteAPI(`/demandes/${demandeEnCours.id}/modifier`, {
+        method: "PUT",
         body: JSON.stringify(demande),
       });
     } else {

@@ -75,18 +75,21 @@ if (inscriptionForm) {
       return;
     }
 
-    // Le formulaire n'a qu'un champ villeQuartier combiné : envoyé tel quel
-    // dans ville ET quartier tant qu'il n'est pas scindé en deux champs.
     let extraData = {};
     if (roleRadio === "prestataire") {
       const metier = document.querySelector("#metier")?.value;
-      const villeQuartier = document.querySelector("#villeQuartier")?.value.trim();
+      const ville = document.querySelector("#inscriptionVille")?.value.trim();
+      const quartier = document.querySelector("#inscriptionQuartier")?.value.trim();
 
       if (!metier) {
         afficherNotification("Veuillez sélectionner votre métier.", "warning");
         return;
       }
-      extraData = { metier, ville: villeQuartier || "Abidjan", quartier: villeQuartier || null };
+      if (!ville) {
+        afficherNotification("Veuillez indiquer votre ville.", "warning");
+        return;
+      }
+      extraData = { metier, ville, quartier: quartier || null };
     }
 
     const submitButton = inscriptionForm.querySelector("button[type='submit']");

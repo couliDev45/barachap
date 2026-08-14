@@ -70,6 +70,11 @@ function construireCarteDemande(demande) {
   const cleStatut = normaliserStatut(demande.statut);
   const config = STATUT_CONFIG[cleStatut];
 
+  const boutonAvis =
+    cleStatut === "acceptee" && !demande.a_avis
+      ? `<button class="btn-primary" onclick="ouvrirFormAvis(${demande.id})">Laisser un avis</button>`
+      : "";
+
   return `
     <div class="prestataire-card">
       <div class="card-header">
@@ -87,6 +92,7 @@ function construireCarteDemande(demande) {
         <button class="btn-delete" onclick="supprimerDemande(${demande.id})">
           Supprimer
         </button>
+        ${boutonAvis}
       </div>
     </div>
   `;
@@ -145,8 +151,8 @@ window.modifierDemande = function modifierDemande(id) {
   if (!demande) return;
 
   // Normalise les noms de colonnes SQL vers les noms de champs attendus
-  // par le formulaire de demande.js, et conserve l'id réel pour le
-  // DELETE + POST effectué à la resoumission (voir demande.js)
+  // par le formulaire de demande.js. L'id réel est conservé pour l'appel
+  // à PUT /api/demandes/:id/modifier lors de la resoumission.
   ecrireStockage("demandeEnCours", {
     id: demande.id,
     prestation: demande.prestation,
@@ -160,6 +166,57 @@ window.modifierDemande = function modifierDemande(id) {
 
   window.location.href = "demande.html";
 };
+
+// --- Avis client ---
+
+const formAvis = document.querySelector("#formAvis");
+const avisNoteInput = document.querySelector("#avisNoteInput");
+const avisCommentaireInput = document.querySelector("#avisCommentaireInput");
+const avisFormMessage = document.querySelector("#avisFormMessage");
+const btnValiderAvis = document.querySelector("#btnValiderAvis");
+
+let demandeIdPourAvis = null;
+
+window.ouvrirFormAvis = function ouvrirFormAvis(id) {
+  demandeIdPourAvis = id;
+  if (avisFormMessage) avisFormMessage.textContent = "";
+  if (formAvis) {
+    formAvis.style.display = "block";
+    formAvis.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+};
+
+if (btnValiderAvis) {
+  btnValiderAvis.addEventListener("click", async () => {
+    if (!demandeIdPourAvis) return;
+
+    btnValiderAvis.disabled = true;
+
+    const reponse = await requeteAPI("/avis", {
+      method: "POST",
+      body: JSON.stringify({
+        demandeId: demandeIdPourAvis,
+        note: parseInt(avisNoteInput?.value, 10),
+        commentaire: avisCommentaireInput?.value.trim() || null,
+      }),
+    });
+
+    btnValiderAvis.disabled = false;
+
+    if (!reponse?.avis) {
+      if (avisFormMessage) {
+        avisFormMessage.textContent = reponse?.message || "Impossible d'enregistrer l'avis pour le moment.";
+      }
+      return;
+    }
+
+    if (avisCommentaireInput) avisCommentaireInput.value = "";
+    if (formAvis) formAvis.style.display = "none";
+    demandeIdPourAvis = null;
+
+    actualiserDashboard();
+  });
+}
 
 // Barre de progression du profil (statique pour le moment)
 const progressFill = document.querySelector(".progress-fill");

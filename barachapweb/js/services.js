@@ -6,7 +6,7 @@
  * - filtrage par catégorie (boutons de filtre)
  *
  * Photo affichée uniquement si le prestataire l'a renseignée (voir
- * prestataire.js) — pas de note affichée, aucun système d'avis côté backend.
+ * prestataire.js). Note affichée uniquement s'il a déjà reçu au moins un avis.
  */
 
 import { requeteAPI } from "./api.js";
@@ -26,6 +26,9 @@ function construireCarte(prestataire) {
   const photo = prestataire.photo_url
     ? `<img src="${prestataire.photo_url}" alt="${echapperHTML(prestataire.nom_complet)}" />`
     : "";
+  const note = prestataire.note_moyenne
+    ? `<div class="rating-badge">Note: ${prestataire.note_moyenne} / 5</div>`
+    : "";
 
   return `
     <div class="advantage-card" data-category="${echapperHTML(categorie)}">
@@ -33,6 +36,7 @@ function construireCarte(prestataire) {
       <h3>${echapperHTML(prestataire.nom_complet)}</h3>
       <p class="metier">${echapperHTML(prestataire.metier)}</p>
       <span>${echapperHTML(ville)}</span>
+      ${note}
       <a href="profil.html?id=${prestataire.id}" class="btn-primary"> Voir le profil </a>
     </div>
   `;

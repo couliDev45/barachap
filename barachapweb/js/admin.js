@@ -6,15 +6,18 @@
  * - Validation et rejet des prestataires en attente (GET pending, PUT validate/:id)
  * - Liste globale des utilisateurs + suspension (GET users, PUT users/:id/suspend)
  * - Gestion des catégories (GET/POST/DELETE /api/admin/categories)
- * Dépend de utils.js (afficherNotification) et api.js (requeteAPI).
+ * - Apparence du site : image hero (PUT /api/admin/parametres/hero_image_url)
+ * Dépend de utils.js (afficherNotification), api.js (requeteAPI) et
+ * cloudinary.js (uploaderImage).
  *
- * ⚠️ La modération des publications (onglet 4) n'a pas de route backend
- * (aucune table "avis"/publications à modérer n'existe côté serveur) :
- * cet onglet reste visuel/local pour l'instant.
+ * ⚠️ La modération des publications (onglet 4) n'a toujours pas de route
+ * backend dédiée (distincte des avis clients, qui eux sont bien connectés
+ * — voir avis.routes.js) : cet onglet reste visuel/local pour l'instant.
  */
 
 import { afficherNotification } from "./utils.js";
 import { requeteAPI } from "./api.js";
+import { uploaderImage } from "./cloudinary.js";
 
 function echapperHTML(texte) {
   const div = document.createElement("div");
@@ -273,3 +276,70 @@ document.addEventListener("click", (e) => {
     }
   }
 });
+
+// --- Apparence du site (image hero) ---
+
+const apparenceHeroApercu = document.querySelector("#apparenceHeroApercu");
+const apparenceHeroInput = document.querySelector("#apparenceHeroInput");
+const apparenceHeroMessage = document.querySelector("#apparenceHeroMessage");
+const btnSauverHero = document.querySelector("#btnSauverHero");
+
+let heroPhotoSelectionnee = null;
+
+async function chargerHeroActuelle() {
+  if (!apparenceHeroApercu) return;
+  const reponse = await requeteAPI("/parametres/hero_image_url");
+  if (reponse?.valeur) apparenceHeroApercu.src = reponse.valeur;
+}
+
+if (apparenceHeroApercu) {
+  chargerHeroActuelle();
+}
+
+if (apparenceHeroInput) {
+  apparenceHeroInput.addEventListener("change", () => {
+    heroPhotoSelectionnee = apparenceHeroInput.files[0] || null;
+    if (heroPhotoSelectionnee && apparenceHeroApercu) {
+      apparenceHeroApercu.src = URL.createObjectURL(heroPhotoSelectionnee);
+    }
+  });
+}
+
+if (btnSauverHero) {
+  btnSauverHero.addEventListener("click", async () => {
+    if (!heroPhotoSelectionnee) {
+      if (apparenceHeroMessage) apparenceHeroMessage.textContent = "Choisissez une image d'abord.";
+      return;
+    }
+
+    btnSauverHero.disabled = true;
+    if (apparenceHeroMessage) apparenceHeroMessage.textContent = "Envoi de l'image...";
+
+    const url = await uploaderImage(heroPhotoSelectionnee);
+
+    if (!url) {
+      btnSauverHero.disabled = false;
+      if (apparenceHeroMessage) {
+        apparenceHeroMessage.textContent =
+          "Échec de l'envoi (Cloudinary non configuré ? voir js/cloudinary.js).";
+      }
+      return;
+    }
+
+    const reponse = await requeteAPI("/admin/parametres/hero_image_url", {
+      method: "PUT",
+      body: JSON.stringify({ valeur: url }),
+    });
+
+    btnSauverHero.disabled = false;
+
+    if (!reponse?.parametre) {
+      if (apparenceHeroMessage) apparenceHeroMessage.textContent = "Erreur lors de l'enregistrement.";
+      return;
+    }
+
+    if (apparenceHeroMessage) apparenceHeroMessage.textContent = "";
+    heroPhotoSelectionnee = null;
+    afficherNotification("Image de la section d'accueil mise à jour avec succès.", "success");
+  });
+}
