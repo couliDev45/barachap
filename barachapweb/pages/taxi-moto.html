@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commander une moto - BaraChap</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <a href="../index.html" style="text-decoration: none;">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </a>
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="form-section">
+        <div class="form-content">
+          <a href="../index.html" class="btn-primary retour-btn">Retour</a>
+
+          <!-- Barrière de connexion : propre à cette page (voir taxi-moto.js) -->
+          <div id="courseGateConnexion" class="demande-form" style="display: none; text-align: center;">
+            <h2>Connectez-vous pour commander une moto</h2>
+            <p style="margin-bottom: 24px;">
+              Un compte est nécessaire pour qu'un chauffeur puisse vous contacter et suivre votre course.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+              <a href="connexion.html" id="courseGateLienConnexion" class="btn-primary" style="text-decoration: none;">Se connecter</a>
+              <a href="inscription.html" id="courseGateLienInscription" class="btn-primary" style="text-decoration: none;">Créer un compte</a>
+            </div>
+          </div>
+
+          <h2 id="courseFormTitre">Commander une moto</h2>
+          <div class="demande-form" id="courseForm">
+            <label>Point de départ</label>
+            <button type="button" class="btn-primary" id="btnMaPosition" style="margin-bottom: 12px;">
+              📍 Utiliser ma position actuelle
+            </button>
+            <div id="carteDepart" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
+            <p id="departAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
+              Cliquez sur la carte ou utilisez votre position actuelle.
+            </p>
+
+            <label style="margin-top: 24px;">Destination</label>
+            <div id="carteDestination" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
+            <p id="destinationAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
+              Cliquez sur la carte pour indiquer où vous allez.
+            </p>
+
+            <label for="courseNom">Nom</label>
+            <input type="text" id="courseNom" placeholder="Entrez votre nom" />
+
+            <label for="courseTelephone">Téléphone</label>
+            <input type="tel" id="courseTelephone" placeholder="Numéro joignable par le chauffeur" />
+
+            <div id="courseMessage"></div>
+            <button class="btn-primary" type="button" id="btnCommanderMoto">
+              Commander la moto
+            </button>
+          </div>
+
+          <!-- Vue de suivi après commande — masquée par défaut -->
+          <div id="courseSuivi" class="demande-form" style="display: none; text-align: center;">
+            <h3 id="courseSuiviTitre">Recherche d'un chauffeur...</h3>
+            <div class="spinner" style="margin: 20px auto; width: 40px; height: 40px;"></div>
+            <p id="courseSuiviDetail" style="color: #666;"></p>
+            <button class="btn-delete" id="btnAnnulerCourse" style="margin-top: 20px;">Annuler la course</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

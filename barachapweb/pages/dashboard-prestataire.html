@@ -134,6 +134,21 @@
           <button class="btn-primary" id="btnValiderRealisation" type="button">Publier cette réalisation</button>
         </div>
 
+        <!-- Section Taxi-moto — affichée uniquement si le prestataire a ce
+             métier (voir prestataire.js). Disponibilité + courses proches. -->
+        <div id="sectionTaxiMoto" style="display: none;">
+          <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+            <h3>Courses taxi-moto à proximité</h3>
+            <p>Activez votre disponibilité pour voir et accepter les courses proches de vous</p>
+          </div>
+
+          <div class="dashboard-actions" style="justify-content: flex-start; margin-bottom: 24px;">
+            <button class="btn-primary" id="btnToggleDisponibilite">Activer ma disponibilité</button>
+          </div>
+
+          <div id="listeCoursesProches" class="dashboard-container" style="margin-bottom: 60px;"></div>
+        </div>
+
         <div class="section-title" style="margin-bottom: 20px; text-align: left;">
           <h3>Demandes de clients reçues</h3>
           <p>Gérez les demandes de prestations qui vous ont été envoyées</p>
