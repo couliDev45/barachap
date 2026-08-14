@@ -72,3 +72,32 @@ if (lienConnexion) {
     lienConnexion.textContent = "Connexion";
   }
 }
+
+// Icône Taxi-moto dans la navigation, sur toutes les pages (la réservation
+// elle-même reste ouverte à tous, la connexion n'est demandée qu'au moment
+// de commander — même logique que pour une demande de service classique).
+if (nav) {
+  const nomPageActuelle = window.location.pathname.split("/").pop();
+
+  if (nomPageActuelle !== "taxi-moto.html") {
+    const dansPages = window.location.pathname.includes("/pages/");
+    const profondeur = dansPages ? "" : "pages/";
+    const prefixeAssets = dansPages ? "../" : "";
+
+    const lienTaxi = document.createElement("a");
+    lienTaxi.href = `${profondeur}taxi-moto.html`;
+    lienTaxi.innerHTML = `<img src="${prefixeAssets}assets/icones/taxi-icon.jpg" alt="" style="width: 20px; height: 20px; vertical-align: middle; border-radius: 4px; margin-right: 6px;" />Taxi-moto`;
+    lienTaxi.style.display = "inline-flex";
+    lienTaxi.style.alignItems = "center";
+
+    if (navToggle) {
+      lienTaxi.addEventListener("click", () => {
+        nav.classList.remove("nav-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    // Inséré en tête de nav pour une bonne visibilité
+    nav.insertBefore(lienTaxi, nav.firstChild);
+  }
+}

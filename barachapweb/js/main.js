@@ -20,3 +20,4 @@ import "./auth.js";
 import "./prestataire.js";
 import "./admin.js";
 import "./hero.js";
+import "./taxi-moto.js";

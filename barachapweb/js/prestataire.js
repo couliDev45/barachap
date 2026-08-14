@@ -7,6 +7,8 @@
  * - édition du profil : bio, photo, ville, quartier (PUT /api/users/me)
  * - services : création (POST /api/services) et suppression (DELETE /api/services/:id)
  * - réalisations : publication (POST /api/realisations) et suppression (DELETE /api/realisations/:id)
+ * - taxi-moto (si metier === "Taxi-moto") : disponibilité, courses proches,
+ *   acceptation "premier arrivé premier servi" (voir courses.routes.js)
  * Dépend de utils.js, api.js (requeteAPI) et cloudinary.js (uploaderImage).
  */
 
@@ -404,4 +406,131 @@ if (btnValiderRealisation) {
     basculerSection("realisation");
     chargerServicesEtRealisations();
   });
+}
+
+// --- Taxi-moto : disponibilité et courses proches ---
+// Section visible uniquement pour un prestataire dont le métier est
+// "Taxi-moto". Le modèle est "premier arrivé, premier servi" parmi les
+// chauffeurs disponibles à proximité plutôt qu'un envoi séquentiel à un
+// seul chauffeur avec minuteur — voir l'explication donnée à l'utilisateur :
+// un navigateur ne peut pas garantir une notification fiable écran verrouillé.
+
+const sectionTaxiMoto = document.querySelector("#sectionTaxiMoto");
+
+if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
+  sectionTaxiMoto.style.display = "block";
+
+  const btnToggleDisponibilite = document.querySelector("#btnToggleDisponibilite");
+  const listeCoursesProches = document.querySelector("#listeCoursesProches");
+
+  let estDisponible = false;
+  let intervalPosition = null;
+  let intervalCourses = null;
+
+  function construireCarteCourse(course) {
+    const distance = course.distance_km != null ? `${course.distance_km} km` : "";
+    return `
+      <div class="prestataire-card" data-id="${course.id}">
+        <div class="card-header">
+          <h3>Course ${distance ? `— ${distance}` : ""}</h3>
+        </div>
+        <p><strong>Départ :</strong> ${echapperHTML(course.depart_adresse || `${course.depart_lat}, ${course.depart_lng}`)}</p>
+        <p><strong>Destination :</strong> ${echapperHTML(course.destination_adresse || `${course.destination_lat}, ${course.destination_lng}`)}</p>
+        <p><strong>Client :</strong> ${echapperHTML(course.nom_client)}</p>
+        <div class="dashboard-actions">
+          <button class="btn-success btn-accepter-course">Accepter cette course</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function chargerCoursesProches() {
+    if (!listeCoursesProches) return;
+    const reponse = await requeteAPI("/courses/disponibles");
+    const courses = reponse?.courses || [];
+
+    listeCoursesProches.innerHTML = courses.length
+      ? courses.map(construireCarteCourse).join("")
+      : `<div class="etat-vide"><p>Aucune course à proximité pour le moment.</p></div>`;
+  }
+
+  async function envoyerPosition() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      await requeteAPI("/users/disponibilite", {
+        method: "PUT",
+        body: JSON.stringify({
+          positionLat: position.coords.latitude,
+          positionLng: position.coords.longitude,
+        }),
+      });
+    });
+  }
+
+  if (btnToggleDisponibilite) {
+    btnToggleDisponibilite.addEventListener("click", async () => {
+      estDisponible = !estDisponible;
+
+      if (estDisponible) {
+        if (!navigator.geolocation) {
+          afficherNotification("La géolocalisation n'est pas disponible sur cet appareil.", "error");
+          estDisponible = false;
+          return;
+        }
+
+        btnToggleDisponibilite.textContent = "Désactiver ma disponibilité";
+        btnToggleDisponibilite.classList.add("btn-delete");
+
+        await requeteAPI("/users/disponibilite", {
+          method: "PUT",
+          body: JSON.stringify({ disponible: true }),
+        });
+        await envoyerPosition();
+        chargerCoursesProches();
+
+        // Position rafraîchie toutes les 30s, liste des courses toutes les 8s,
+        // tant que la disponibilité reste active et la page ouverte.
+        intervalPosition = setInterval(envoyerPosition, 30000);
+        intervalCourses = setInterval(chargerCoursesProches, 8000);
+      } else {
+        btnToggleDisponibilite.textContent = "Activer ma disponibilité";
+        btnToggleDisponibilite.classList.remove("btn-delete");
+
+        await requeteAPI("/users/disponibilite", {
+          method: "PUT",
+          body: JSON.stringify({ disponible: false }),
+        });
+
+        clearInterval(intervalPosition);
+        clearInterval(intervalCourses);
+        if (listeCoursesProches) listeCoursesProches.innerHTML = "";
+      }
+    });
+  }
+
+  if (listeCoursesProches) {
+    listeCoursesProches.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".btn-accepter-course");
+      if (!btn) return;
+
+      const carte = btn.closest("[data-id]");
+      const id = carte?.dataset.id;
+      if (!id) return;
+
+      btn.disabled = true;
+      const reponse = await requeteAPI(`/courses/${id}/accepter`, { method: "PUT" });
+
+      if (!reponse?.course) {
+        afficherNotification(
+          reponse?.message || "Cette course n'est plus disponible.",
+          "warning",
+        );
+        chargerCoursesProches();
+        return;
+      }
+
+      afficherNotification("Course acceptée ! Le client a été prévenu.", "success");
+      chargerCoursesProches();
+    });
+  }
 }
