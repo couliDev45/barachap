@@ -128,4 +128,33 @@ router.put("/me", verifierToken, async (req, res) => {
   }
 });
 
+/**
+ * PUT /api/users/disponibilite
+ * Met à jour la disponibilité et/ou la position de l'utilisateur connecté.
+ * Route légère, pensée pour être appelée fréquemment (toutes les ~30s tant
+ * qu'un chauffeur taxi-moto est disponible) sans surcharger PUT /me.
+ */
+router.put("/disponibilite", verifierToken, async (req, res) => {
+  const { disponible, positionLat, positionLng } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const result = await query(
+      `UPDATE users SET
+        disponible = COALESCE($1, disponible),
+        position_lat = COALESCE($2, position_lat),
+        position_lng = COALESCE($3, position_lng),
+        position_updated_at = CASE WHEN $2 IS NOT NULL THEN CURRENT_TIMESTAMP ELSE position_updated_at END
+       WHERE id = $4
+       RETURNING id, disponible, position_lat, position_lng, position_updated_at`,
+      [disponible ?? null, positionLat ?? null, positionLng ?? null, userId],
+    );
+
+    res.json({ message: "Disponibilité mise à jour.", statut: result.rows[0] });
+  } catch (err) {
+    console.error("Erreur Maj Disponibilité :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la mise à jour de la disponibilité." });
+  }
+});
+
 export default router;
