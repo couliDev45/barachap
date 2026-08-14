@@ -1,8 +1,11 @@
 /**
  * taxi-moto.js
  * Gère la commande d'une course taxi-moto :
- * - deux cartes Leaflet/OpenStreetMap (gratuit, sans clé API) pour choisir
- *   départ et destination en cliquant, ou "Ma position actuelle" pour le départ
+ * - deux cartes Leaflet/OpenStreetMap (gratuit, sans clé API), centrées sur
+ *   Séguéla (Worodougou), pour choisir départ et destination
+ * - trois façons de définir un point : cliquer sur la carte, taper une
+ *   adresse (geocoding via Nominatim, biaisé sur la région), ou "Ma position
+ *   actuelle" pour le départ
  * - reverse-geocoding léger via Nominatim (un seul appel par point posé, pas
  *   en continu) pour afficher une adresse lisible plutôt que des coordonnées
  * - soumission de la course (POST /api/courses) et suivi en direct par
@@ -40,8 +43,8 @@ if (courseForm) {
 function initialiserFormulaireCourse() {
   const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
 
-  // Centre par défaut : Abidjan
-  const CENTRE_DEFAUT = [5.36, -4.0083];
+  // Centre par défaut : Séguéla, région du Worodougou
+  const CENTRE_DEFAUT = [7.9601, -6.6746];
 
   const courseNom = document.querySelector("#courseNom");
   const courseTelephone = document.querySelector("#courseTelephone");
@@ -78,7 +81,28 @@ function initialiserFormulaireCourse() {
     }
   }
 
-  async function definirPoint(type, lat, lng) {
+  // Geocoding direct (adresse tapée -> coordonnées), avec un biais géographique
+  // sur la région du Worodougou/Séguéla plutôt qu'une restriction stricte : une
+  // adresse ailleurs en Côte d'Ivoire reste trouvable, juste moins prioritaire.
+  async function coordonneesDepuisAdresse(adresse) {
+    const [lat, lng] = CENTRE_DEFAUT;
+    const delta = 0.8;
+    const viewbox = `${lng - delta},${lat + delta},${lng + delta},${lat - delta}`;
+
+    try {
+      const reponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse)}&countrycodes=ci&viewbox=${viewbox}&limit=1`,
+      );
+      if (!reponse.ok) throw new Error("Échec du geocoding");
+      const data = await reponse.json();
+      if (!data.length) return null;
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), adresse: data[0].display_name };
+    } catch {
+      return null;
+    }
+  }
+
+  async function definirPoint(type, lat, lng, adresseConnue) {
     const estDepart = type === "depart";
     const carte = estDepart ? carteDepart : carteDestination;
     const label = document.querySelector(estDepart ? "#departAdresseLabel" : "#destinationAdresseLabel");
@@ -91,10 +115,10 @@ function initialiserFormulaireCourse() {
       else marqueurDestination = L.marker([lat, lng]).addTo(carte);
     }
 
-    carte.panTo([lat, lng]);
+    carte.setView([lat, lng], 15);
     if (label) label.textContent = "Localisation en cours...";
 
-    const adresse = await adresseDepuisCoordonnees(lat, lng);
+    const adresse = adresseConnue ?? (await adresseDepuisCoordonnees(lat, lng));
     const point = { lat, lng, adresse };
 
     if (estDepart) pointDepart = point;
@@ -105,6 +129,55 @@ function initialiserFormulaireCourse() {
 
   carteDepart.on("click", (e) => definirPoint("depart", e.latlng.lat, e.latlng.lng));
   carteDestination.on("click", (e) => definirPoint("destination", e.latlng.lat, e.latlng.lng));
+
+  // --- Recherche d'adresse tapée manuellement ---
+
+  async function rechercherEtDefinir(type, input) {
+    const adresse = input?.value.trim();
+    if (!adresse) return;
+
+    const label = document.querySelector(type === "depart" ? "#departAdresseLabel" : "#destinationAdresseLabel");
+    if (label) label.textContent = "Recherche en cours...";
+
+    const resultat = await coordonneesDepuisAdresse(adresse);
+
+    if (!resultat) {
+      if (label) label.textContent = "Adresse introuvable. Essayez une formulation différente ou cliquez sur la carte.";
+      return;
+    }
+
+    definirPoint(type, resultat.lat, resultat.lng, resultat.adresse);
+  }
+
+  const departAdresseInput = document.querySelector("#departAdresseInput");
+  const destinationAdresseInput = document.querySelector("#destinationAdresseInput");
+  const btnRechercherDepart = document.querySelector("#btnRechercherDepart");
+  const btnRechercherDestination = document.querySelector("#btnRechercherDestination");
+
+  if (btnRechercherDepart) {
+    btnRechercherDepart.addEventListener("click", () => rechercherEtDefinir("depart", departAdresseInput));
+  }
+  if (departAdresseInput) {
+    departAdresseInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        rechercherEtDefinir("depart", departAdresseInput);
+      }
+    });
+  }
+  if (btnRechercherDestination) {
+    btnRechercherDestination.addEventListener("click", () =>
+      rechercherEtDefinir("destination", destinationAdresseInput),
+    );
+  }
+  if (destinationAdresseInput) {
+    destinationAdresseInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        rechercherEtDefinir("destination", destinationAdresseInput);
+      }
+    });
+  }
 
   const btnMaPosition = document.querySelector("#btnMaPosition");
   if (btnMaPosition) {
@@ -118,11 +191,10 @@ function initialiserFormulaireCourse() {
         (position) => {
           btnMaPosition.disabled = false;
           definirPoint("depart", position.coords.latitude, position.coords.longitude);
-          carteDepart.setView([position.coords.latitude, position.coords.longitude], 15);
         },
         () => {
           btnMaPosition.disabled = false;
-          afficherMessageCourse("Impossible d'obtenir votre position. Cliquez sur la carte pour la définir manuellement.");
+          afficherMessageCourse("Impossible d'obtenir votre position. Cliquez sur la carte ou tapez une adresse.");
         },
       );
     });
