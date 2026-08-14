@@ -79,6 +79,7 @@
           <button class="tab-btn" data-tab="tab-utilisateurs">Utilisateurs</button>
           <button class="tab-btn" data-tab="tab-categories">Gérer Catégories</button>
           <button class="tab-btn" data-tab="tab-publications">Publications & Modération</button>
+          <button class="tab-btn" data-tab="tab-apparence">Apparence</button>
         </div>
 
         <!-- Contenu Onglet 1: Validation Prestataires -->
@@ -255,6 +256,33 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Contenu Onglet 5: Apparence -->
+        <div id="tab-apparence" class="tab-content">
+          <h3>Apparence du site</h3>
+          <p style="margin-bottom: 16px; color: #666;">
+            Modifiez l'image affichée dans la section d'accueil (hero) sans toucher au code.
+          </p>
+
+          <div class="demande-form" style="max-width: 600px;">
+            <label>Image actuelle</label>
+            <img
+              id="apparenceHeroApercu"
+              src="../assets/images/propologob.png"
+              alt="Aperçu image hero"
+              style="max-width: 100%; border-radius: var(--radius-medium); margin-bottom: 16px; display: block;"
+            />
+
+            <label for="apparenceHeroInput">Nouvelle image</label>
+            <input type="file" id="apparenceHeroInput" accept="image/*" />
+
+            <div id="apparenceHeroMessage"></div>
+
+            <button class="btn-primary" id="btnSauverHero" type="button" style="margin-top: 16px;">
+              Enregistrer cette image
+            </button>
           </div>
         </div>
       </section>

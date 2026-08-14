@@ -83,6 +83,25 @@
         </div>
 
         <h3 class="dashboard-title">Mes demandes</h3>
+
+        <!-- Formulaire d'avis — masqué par défaut, ouvert depuis le bouton
+             "Laisser un avis" d'une carte de demande acceptée (voir dashboard.js) -->
+        <div id="formAvis" class="demande-form" style="display: none; max-width: 700px; margin: 0 auto 30px;">
+          <h3 style="margin-bottom: 20px;">Laisser un avis</h3>
+          <label for="avisNoteInput">Note</label>
+          <select id="avisNoteInput">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Très bien</option>
+            <option value="3">3 - Correct</option>
+            <option value="2">2 - Décevant</option>
+            <option value="1">1 - Très décevant</option>
+          </select>
+          <label for="avisCommentaireInput">Commentaire (facultatif)</label>
+          <textarea id="avisCommentaireInput" rows="3" placeholder="Votre expérience avec ce prestataire..."></textarea>
+          <div id="avisFormMessage"></div>
+          <button class="btn-primary" id="btnValiderAvis" type="button">Envoyer mon avis</button>
+        </div>
+
         <div id="listeDemandes" class="dashboard-container"></div>
         <!-- Le conteneur #dashboardStats a été retiré : il faisait doublon
              avec le bloc .dashboard-stats ci-dessus, rempli par le même
