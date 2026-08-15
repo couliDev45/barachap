@@ -69,18 +69,22 @@ router.get("/", async (req, res) => {
   const { id: userId, role } = req.user;
 
   try {
-    let sql = "SELECT * FROM courses";
+    let sql = `
+      SELECT courses.*, chauffeur.nom_complet AS chauffeur_nom, chauffeur.telephone AS chauffeur_telephone, chauffeur.photo_url AS chauffeur_photo
+      FROM courses
+      LEFT JOIN users AS chauffeur ON chauffeur.id = courses.chauffeur_id
+    `;
     const params = [];
 
     if (role === "prestataire") {
       params.push(userId);
-      sql += ` WHERE chauffeur_id = $${params.length}`;
+      sql += ` WHERE courses.chauffeur_id = $${params.length}`;
     } else if (role === "client") {
       params.push(userId);
-      sql += ` WHERE client_id = $${params.length}`;
+      sql += ` WHERE courses.client_id = $${params.length}`;
     }
 
-    sql += " ORDER BY created_at DESC";
+    sql += " ORDER BY courses.created_at DESC";
 
     const result = await query(sql, params);
     res.json({ courses: result.rows });
