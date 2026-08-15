@@ -448,14 +448,6 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
   let intervalPosition = null;
   let intervalCourses = null;
 
-  // Normalise un numéro ivoirien en format international pour wa.me
-  function normaliserPourWhatsApp(telephone) {
-    const chiffres = (telephone || "").replace(/\D/g, "");
-    if (chiffres.startsWith("225")) return chiffres;
-    if (chiffres.startsWith("0")) return "225" + chiffres.slice(1);
-    return "225" + chiffres;
-  }
-
   function afficherCourseEnCours(course) {
     if (!courseEnCours) return;
 

@@ -1,15 +1,17 @@
 /**
  * taxi-moto.js
  * Gère la commande d'une course taxi-moto :
- * - deux cartes Leaflet/OpenStreetMap (gratuit, sans clé API), centrées sur
- *   Séguéla (Worodougou), pour choisir départ et destination
- * - trois façons de définir un point : cliquer sur la carte, taper une
- *   adresse (geocoding via Nominatim, biaisé sur la région), ou "Ma position
- *   actuelle" pour le départ
- * - reverse-geocoding léger via Nominatim (un seul appel par point posé, pas
- *   en continu) pour afficher une adresse lisible plutôt que des coordonnées
+ * - départ et destination en TEXTE LIBRE, avec suggestions en direct
+ *   (Nominatim, biaisé sur la région de Séguéla/Worodougou) — choisir une
+ *   suggestion capture ses coordonnées, mais ce n'est jamais obligatoire :
+ *   beaucoup de lieux réels (quartiers, repères locaux) n'existent pas sur
+ *   OpenStreetMap, la course doit pouvoir être commandée avec juste une
+ *   description tapée à la main
+ * - "Ma position actuelle" pour pré-remplir le départ
  * - soumission de la course (POST /api/courses) et suivi en direct par
- *   sondage (GET /api/courses) jusqu'à ce qu'un chauffeur accepte
+ *   sondage (GET /api/courses) jusqu'à ce qu'un chauffeur accepte, avec
+ *   partage des coordonnées du chauffeur une fois trouvé (le chauffeur a
+ *   déjà celles du client, incluses directement dans la course)
  * - barrière de connexion propre à cette page
  */
 
@@ -40,144 +42,118 @@ if (courseForm) {
   }
 }
 
+// Centre par défaut du biais géographique : Séguéla, région du Worodougou
+const CENTRE_DEFAUT = { lat: 7.9601, lng: -6.6746 };
+
 function initialiserFormulaireCourse() {
   const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
-
-  // Centre par défaut : Séguéla, région du Worodougou
-  const CENTRE_DEFAUT = [7.9601, -6.6746];
 
   const courseNom = document.querySelector("#courseNom");
   const courseTelephone = document.querySelector("#courseTelephone");
   if (courseNom && utilisateurConnecte?.nom_complet) courseNom.value = utilisateurConnecte.nom_complet;
   if (courseTelephone && utilisateurConnecte?.telephone) courseTelephone.value = utilisateurConnecte.telephone;
 
-  const carteDepart = L.map("carteDepart").setView(CENTRE_DEFAUT, 13);
-  const carteDestination = L.map("carteDestination").setView(CENTRE_DEFAUT, 13);
-
-  [carteDepart, carteDestination].forEach((carte) => {
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap",
-      maxZoom: 19,
-    }).addTo(carte);
-  });
-
-  let marqueurDepart = null;
-  let marqueurDestination = null;
-  let pointDepart = null; // { lat, lng, adresse }
-  let pointDestination = null;
-
-  // Reverse-geocoding léger : un seul appel par point posé, jamais en continu
-  // (respecte la politique d'usage de Nominatim, le service gratuit d'OpenStreetMap)
-  async function adresseDepuisCoordonnees(lat, lng) {
-    try {
-      const reponse = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
-      );
-      if (!reponse.ok) throw new Error("Échec reverse-geocoding");
-      const data = await reponse.json();
-      return data.display_name || null;
-    } catch {
-      return null;
-    }
+  const courseMessage = document.querySelector("#courseMessage");
+  function afficherMessageCourse(texte) {
+    if (courseMessage) courseMessage.textContent = texte;
   }
 
-  // Geocoding direct (adresse tapée -> coordonnées), avec un biais géographique
-  // sur la région du Worodougou/Séguéla plutôt qu'une restriction stricte : une
-  // adresse ailleurs en Côte d'Ivoire reste trouvable, juste moins prioritaire.
-  async function coordonneesDepuisAdresse(adresse) {
-    const [lat, lng] = CENTRE_DEFAUT;
-    const delta = 0.8;
-    const viewbox = `${lng - delta},${lat + delta},${lng + delta},${lat - delta}`;
+  // Points retenus pour chaque champ : le texte est TOUJOURS ce que
+  // l'utilisateur voit dans l'input (tapé ou choisi via suggestion) ; lat/lng
+  // ne sont renseignés que si une suggestion a été cliquée, et sont effacés
+  // dès que le texte est modifié à la main pour ne jamais envoyer des
+  // coordonnées qui ne correspondent plus à ce qui est affiché.
+  const points = {
+    depart: { lat: null, lng: null },
+    destination: { lat: null, lng: null },
+  };
 
-    try {
-      const reponse = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse)}&countrycodes=ci&viewbox=${viewbox}&limit=1`,
-      );
-      if (!reponse.ok) throw new Error("Échec du geocoding");
-      const data = await reponse.json();
-      if (!data.length) return null;
-      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), adresse: data[0].display_name };
-    } catch {
-      return null;
-    }
-  }
+  // --- Autocomplétion (suggestions en direct pendant la saisie) ---
 
-  async function definirPoint(type, lat, lng, adresseConnue) {
-    const estDepart = type === "depart";
-    const carte = estDepart ? carteDepart : carteDestination;
-    const label = document.querySelector(estDepart ? "#departAdresseLabel" : "#destinationAdresseLabel");
+  function initAutocompletion(type) {
+    const input = document.querySelector(type === "depart" ? "#departAdresseInput" : "#destinationAdresseInput");
+    const liste = document.querySelector(type === "depart" ? "#departSuggestions" : "#destinationSuggestions");
+    if (!input || !liste) return;
 
-    if (estDepart) {
-      if (marqueurDepart) marqueurDepart.setLatLng([lat, lng]);
-      else marqueurDepart = L.marker([lat, lng]).addTo(carte);
-    } else {
-      if (marqueurDestination) marqueurDestination.setLatLng([lat, lng]);
-      else marqueurDestination = L.marker([lat, lng]).addTo(carte);
+    let timeoutId = null;
+
+    function fermerListe() {
+      liste.style.display = "none";
+      liste.innerHTML = "";
     }
 
-    carte.setView([lat, lng], 15);
-    if (label) label.textContent = "Localisation en cours...";
+    async function rechercherSuggestions(texte) {
+      const delta = 0.8;
+      const viewbox = `${CENTRE_DEFAUT.lng - delta},${CENTRE_DEFAUT.lat + delta},${CENTRE_DEFAUT.lng + delta},${CENTRE_DEFAUT.lat - delta}`;
 
-    const adresse = adresseConnue ?? (await adresseDepuisCoordonnees(lat, lng));
-    const point = { lat, lng, adresse };
-
-    if (estDepart) pointDepart = point;
-    else pointDestination = point;
-
-    if (label) label.textContent = adresse || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-  }
-
-  carteDepart.on("click", (e) => definirPoint("depart", e.latlng.lat, e.latlng.lng));
-  carteDestination.on("click", (e) => definirPoint("destination", e.latlng.lat, e.latlng.lng));
-
-  // --- Recherche d'adresse tapée manuellement ---
-
-  async function rechercherEtDefinir(type, input) {
-    const adresse = input?.value.trim();
-    if (!adresse) return;
-
-    const label = document.querySelector(type === "depart" ? "#departAdresseLabel" : "#destinationAdresseLabel");
-    if (label) label.textContent = "Recherche en cours...";
-
-    const resultat = await coordonneesDepuisAdresse(adresse);
-
-    if (!resultat) {
-      if (label) label.textContent = "Adresse introuvable. Essayez une formulation différente ou cliquez sur la carte.";
-      return;
-    }
-
-    definirPoint(type, resultat.lat, resultat.lng, resultat.adresse);
-  }
-
-  const departAdresseInput = document.querySelector("#departAdresseInput");
-  const destinationAdresseInput = document.querySelector("#destinationAdresseInput");
-  const btnRechercherDepart = document.querySelector("#btnRechercherDepart");
-  const btnRechercherDestination = document.querySelector("#btnRechercherDestination");
-
-  if (btnRechercherDepart) {
-    btnRechercherDepart.addEventListener("click", () => rechercherEtDefinir("depart", departAdresseInput));
-  }
-  if (departAdresseInput) {
-    departAdresseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        rechercherEtDefinir("depart", departAdresseInput);
+      try {
+        const reponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texte)}&countrycodes=ci&viewbox=${viewbox}&limit=5`,
+        );
+        if (!reponse.ok) throw new Error("Échec de la recherche");
+        return await reponse.json();
+      } catch {
+        return [];
       }
+    }
+
+    input.addEventListener("input", () => {
+      // Le texte a changé à la main : les coordonnées précédentes ne
+      // correspondent plus forcément à ce qui est affiché, on les efface.
+      points[type].lat = null;
+      points[type].lng = null;
+
+      clearTimeout(timeoutId);
+      const texte = input.value.trim();
+
+      if (texte.length < 3) {
+        fermerListe();
+        return;
+      }
+
+      timeoutId = setTimeout(async () => {
+        const resultats = await rechercherSuggestions(texte);
+
+        if (!resultats.length) {
+          fermerListe();
+          return;
+        }
+
+        liste.innerHTML = resultats
+          .map(
+            (r, i) => `
+          <div class="suggestion-item" data-index="${i}" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px;">
+            ${r.display_name}
+          </div>
+        `,
+          )
+          .join("");
+        liste.style.display = "block";
+
+        liste.querySelectorAll(".suggestion-item").forEach((el) => {
+          el.addEventListener("mouseenter", () => (el.style.backgroundColor = "var(--gray-light)"));
+          el.addEventListener("mouseleave", () => (el.style.backgroundColor = ""));
+          el.addEventListener("click", () => {
+            const resultat = resultats[parseInt(el.dataset.index, 10)];
+            input.value = resultat.display_name;
+            points[type].lat = parseFloat(resultat.lat);
+            points[type].lng = parseFloat(resultat.lon);
+            fermerListe();
+          });
+        });
+      }, 400);
+    });
+
+    // Ferme la liste si on clique ailleurs sur la page
+    document.addEventListener("click", (e) => {
+      if (e.target !== input && !liste.contains(e.target)) fermerListe();
     });
   }
-  if (btnRechercherDestination) {
-    btnRechercherDestination.addEventListener("click", () =>
-      rechercherEtDefinir("destination", destinationAdresseInput),
-    );
-  }
-  if (destinationAdresseInput) {
-    destinationAdresseInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        rechercherEtDefinir("destination", destinationAdresseInput);
-      }
-    });
-  }
+
+  initAutocompletion("depart");
+  initAutocompletion("destination");
+
+  // --- Ma position actuelle (pré-remplit le champ départ en texte) ---
 
   const btnMaPosition = document.querySelector("#btnMaPosition");
   if (btnMaPosition) {
@@ -187,41 +163,59 @@ function initialiserFormulaireCourse() {
         return;
       }
       btnMaPosition.disabled = true;
+      btnMaPosition.textContent = "Localisation en cours...";
+
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          points.depart.lat = latitude;
+          points.depart.lng = longitude;
+
+          const departInput = document.querySelector("#departAdresseInput");
+          try {
+            const reponse = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            );
+            const data = await reponse.json();
+            if (departInput) departInput.value = data.display_name || `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+          } catch {
+            if (departInput) departInput.value = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+          }
+
           btnMaPosition.disabled = false;
-          definirPoint("depart", position.coords.latitude, position.coords.longitude);
+          btnMaPosition.textContent = "📍 Utiliser ma position actuelle";
         },
         () => {
           btnMaPosition.disabled = false;
-          afficherMessageCourse("Impossible d'obtenir votre position. Cliquez sur la carte ou tapez une adresse.");
+          btnMaPosition.textContent = "📍 Utiliser ma position actuelle";
+          afficherMessageCourse("Impossible d'obtenir votre position. Tapez votre lieu de départ manuellement.");
         },
       );
     });
   }
 
-  const courseMessage = document.querySelector("#courseMessage");
-  function afficherMessageCourse(texte) {
-    if (courseMessage) courseMessage.textContent = texte;
-  }
-
   // --- Soumission de la course ---
+  // Seuls le nom, le téléphone, et les deux textes (départ/destination) sont
+  // obligatoires — jamais les coordonnées : le service doit rester utilisable
+  // même pour un lieu introuvable sur la carte.
 
   const btnCommanderMoto = document.querySelector("#btnCommanderMoto");
   if (btnCommanderMoto) {
     btnCommanderMoto.addEventListener("click", async () => {
       const nom = courseNom?.value.trim();
       const telephone = courseTelephone?.value.trim();
+      const departTexte = document.querySelector("#departAdresseInput")?.value.trim();
+      const destinationTexte = document.querySelector("#destinationAdresseInput")?.value.trim();
 
       if (!nom || !telephone) {
         afficherMessageCourse("Veuillez indiquer votre nom et votre téléphone.");
         return;
       }
-      if (!pointDepart) {
+      if (!departTexte) {
         afficherMessageCourse("Veuillez indiquer votre point de départ.");
         return;
       }
-      if (!pointDestination) {
+      if (!destinationTexte) {
         afficherMessageCourse("Veuillez indiquer votre destination.");
         return;
       }
@@ -234,12 +228,12 @@ function initialiserFormulaireCourse() {
         body: JSON.stringify({
           nom,
           telephone,
-          departLat: pointDepart.lat,
-          departLng: pointDepart.lng,
-          departAdresse: pointDepart.adresse,
-          destinationLat: pointDestination.lat,
-          destinationLng: pointDestination.lng,
-          destinationAdresse: pointDestination.adresse,
+          departLat: points.depart.lat,
+          departLng: points.depart.lng,
+          departAdresse: departTexte,
+          destinationLat: points.destination.lat,
+          destinationLng: points.destination.lng,
+          destinationAdresse: destinationTexte,
         }),
       });
 
@@ -262,12 +256,24 @@ function initialiserFormulaireCourse() {
 
     const courseSuivi = document.querySelector("#courseSuivi");
     const courseSuiviTitre = document.querySelector("#courseSuiviTitre");
+    const courseSuiviSpinner = document.querySelector("#courseSuiviSpinner");
     const courseSuiviDetail = document.querySelector("#courseSuiviDetail");
     const btnAnnulerCourse = document.querySelector("#btnAnnulerCourse");
+    const chauffeurContact = document.querySelector("#chauffeurContact");
+    const chauffeurNom = document.querySelector("#chauffeurNom");
+    const chauffeurAppeler = document.querySelector("#chauffeurAppeler");
+    const chauffeurWhatsapp = document.querySelector("#chauffeurWhatsapp");
 
     if (courseSuivi) courseSuivi.style.display = "block";
 
     let intervalId = null;
+
+    function normaliserPourWhatsApp(telephone) {
+      const chiffres = (telephone || "").replace(/\D/g, "");
+      if (chiffres.startsWith("225")) return chiffres;
+      if (chiffres.startsWith("0")) return "225" + chiffres.slice(1);
+      return "225" + chiffres;
+    }
 
     async function verifierStatut() {
       const reponse = await requeteAPI("/courses");
@@ -276,17 +282,30 @@ function initialiserFormulaireCourse() {
 
       if (course.statut === "Acceptée" || course.statut === "En cours") {
         if (courseSuiviTitre) courseSuiviTitre.textContent = "Chauffeur trouvé !";
+        if (courseSuiviSpinner) courseSuiviSpinner.style.display = "none";
         if (courseSuiviDetail) {
-          courseSuiviDetail.textContent = "Votre chauffeur a été notifié et arrive vers votre position.";
+          courseSuiviDetail.textContent = "Voici les coordonnées de votre chauffeur :";
         }
+
+        if (chauffeurContact && course.chauffeur_nom) {
+          chauffeurContact.style.display = "block";
+          if (chauffeurNom) chauffeurNom.textContent = course.chauffeur_nom;
+          if (chauffeurAppeler) chauffeurAppeler.href = `tel:${course.chauffeur_telephone || ""}`;
+          if (chauffeurWhatsapp) {
+            chauffeurWhatsapp.href = `https://wa.me/${normaliserPourWhatsApp(course.chauffeur_telephone)}`;
+          }
+        }
+
         if (btnAnnulerCourse) btnAnnulerCourse.style.display = "none";
         clearInterval(intervalId);
       } else if (course.statut === "Terminée") {
         if (courseSuiviTitre) courseSuiviTitre.textContent = "Course terminée";
+        if (courseSuiviSpinner) courseSuiviSpinner.style.display = "none";
         if (courseSuiviDetail) courseSuiviDetail.textContent = "Merci d'avoir utilisé BaraChap !";
         clearInterval(intervalId);
       } else if (course.statut === "Annulée") {
         if (courseSuiviTitre) courseSuiviTitre.textContent = "Course annulée";
+        if (courseSuiviSpinner) courseSuiviSpinner.style.display = "none";
         clearInterval(intervalId);
       }
     }
@@ -303,6 +322,7 @@ function initialiserFormulaireCourse() {
         });
         clearInterval(intervalId);
         if (courseSuiviTitre) courseSuiviTitre.textContent = "Course annulée";
+        if (courseSuiviSpinner) courseSuiviSpinner.style.display = "none";
         if (btnAnnulerCourse) btnAnnulerCourse.style.display = "none";
       });
     }
