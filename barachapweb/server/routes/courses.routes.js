@@ -34,13 +34,18 @@ function sqlDistanceKm(latParam, lngParam, colLat, colLng) {
 /**
  * POST /api/courses
  * Le client connecté crée une nouvelle demande de course.
+ * Seuls le nom, le téléphone et le texte des deux adresses sont obligatoires
+ * — les coordonnées GPS sont un bonus quand elles sont disponibles (via une
+ * suggestion choisie côté client), jamais un blocage. Beaucoup de lieux
+ * réels n'existent pas sur OpenStreetMap, surtout dans les zones moins
+ * couvertes : le client doit pouvoir commander avec une simple description.
  */
 router.post("/", async (req, res) => {
   const { nom, telephone, departLat, departLng, departAdresse, destinationLat, destinationLng, destinationAdresse } =
     req.body;
   const clientId = req.user.id;
 
-  if (!nom || !telephone || departLat == null || departLng == null || destinationLat == null || destinationLng == null) {
+  if (!nom || !telephone || !departAdresse?.trim() || !destinationAdresse?.trim()) {
     return res.status(400).json({ message: "Veuillez indiquer le départ et la destination." });
   }
 
@@ -49,7 +54,17 @@ router.post("/", async (req, res) => {
       `INSERT INTO courses (client_id, nom_client, telephone_client, depart_lat, depart_lng, depart_adresse, destination_lat, destination_lng, destination_adresse, statut)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'En attente')
        RETURNING *`,
-      [clientId, nom, telephone, departLat, departLng, departAdresse || null, destinationLat, destinationLng, destinationAdresse || null],
+      [
+        clientId,
+        nom,
+        telephone,
+        departLat ?? null,
+        departLng ?? null,
+        departAdresse.trim(),
+        destinationLat ?? null,
+        destinationLng ?? null,
+        destinationAdresse.trim(),
+      ],
     );
 
     res.status(201).json({ message: "Recherche d'un chauffeur en cours...", course: result.rows[0] });
@@ -97,7 +112,9 @@ router.get("/", async (req, res) => {
 /**
  * GET /api/courses/disponibles
  * Pour un chauffeur disponible : les courses en attente triées par distance
- * depuis sa dernière position connue.
+ * depuis sa dernière position connue. Les courses sans coordonnées GPS
+ * (adresse tapée librement, non trouvée sur la carte) restent visibles —
+ * juste sans distance calculable, affichées après celles qui en ont une.
  */
 router.get("/disponibles", async (req, res) => {
   const { id: userId } = req.user;
@@ -117,10 +134,14 @@ router.get("/disponibles", async (req, res) => {
 
     const distance = sqlDistanceKm("$1", "$2", "depart_lat", "depart_lng");
     const result = await query(
-      `SELECT *, ROUND(${distance}::numeric, 1) AS distance_km
+      `SELECT *,
+        CASE WHEN depart_lat IS NOT NULL AND depart_lng IS NOT NULL
+          THEN ROUND(${distance}::numeric, 1)
+          ELSE NULL
+        END AS distance_km
        FROM courses
        WHERE statut = 'En attente'
-       ORDER BY distance_km ASC
+       ORDER BY distance_km ASC NULLS LAST
        LIMIT 20`,
       [position_lat, position_lng],
     );
