@@ -86,9 +86,7 @@ if (nav) {
 
     const lienTaxi = document.createElement("a");
     lienTaxi.href = `${profondeur}taxi-moto.html`;
-    lienTaxi.innerHTML = `<img src="${prefixeAssets}assets/icones/taxi-icon.jpg" alt="" style="width: 20px; height: 20px; vertical-align: middle; border-radius: 4px; margin-right: 6px;" />Taxi-moto`;
-    lienTaxi.style.display = "inline-flex";
-    lienTaxi.style.alignItems = "center";
+    lienTaxi.innerHTML = `<img src="${prefixeAssets}assets/icones/taxi-icon.jpg" alt="" style="width: 18px; height: 18px; vertical-align: middle; border-radius: 4px; margin-right: 6px; object-fit: cover;" />Taxi-moto`;
 
     if (navToggle) {
       lienTaxi.addEventListener("click", () => {
