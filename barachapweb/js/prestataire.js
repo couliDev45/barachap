@@ -23,11 +23,24 @@ function echapperHTML(texte) {
 }
 
 const utilisateurConnecte = lireStockage("utilisateurConnecte", null);
+const estChauffeurTaxiMoto = utilisateurConnecte?.metier === "Taxi-moto";
 
 // Message de bienvenue avec le vrai prénom
 const prestataireGreeting = document.querySelector("#prestataireGreeting");
 if (prestataireGreeting && utilisateurConnecte?.nom_complet) {
   prestataireGreeting.textContent = `Bonjour, ${utilisateurConnecte.nom_complet.split(" ")[0]}`;
+}
+
+// Un chauffeur taxi-moto ne publie ni services ni réalisations — son profil
+// public (voir profil.js) ne montre que ses infos de base, son ancienneté
+// et ses avis. On masque donc ces boutons et sections ici aussi.
+if (estChauffeurTaxiMoto) {
+  document.querySelector("#btnAddService")?.remove();
+  document.querySelector("#btnAddRealisation")?.remove();
+  const blocServices = document.querySelector("#blocServices");
+  const blocRealisations = document.querySelector("#blocRealisations");
+  if (blocServices) blocServices.style.display = "none";
+  if (blocRealisations) blocRealisations.style.display = "none";
 }
 
 // --- Demandes reçues ---
@@ -174,7 +187,7 @@ async function chargerServicesEtRealisations() {
   }
 }
 
-if (mesServicesActifs || mesRealisations) {
+if ((mesServicesActifs || mesRealisations) && !estChauffeurTaxiMoto) {
   chargerServicesEtRealisations();
 }
 
@@ -422,10 +435,67 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
 
   const btnToggleDisponibilite = document.querySelector("#btnToggleDisponibilite");
   const listeCoursesProches = document.querySelector("#listeCoursesProches");
+  const courseEnCours = document.querySelector("#courseEnCours");
+  const courseEnCoursClient = document.querySelector("#courseEnCoursClient");
+  const courseEnCoursDepart = document.querySelector("#courseEnCoursDepart");
+  const courseEnCoursDestination = document.querySelector("#courseEnCoursDestination");
+  const courseEnCoursAppeler = document.querySelector("#courseEnCoursAppeler");
+  const courseEnCoursWhatsapp = document.querySelector("#courseEnCoursWhatsapp");
+  const btnTerminerCourse = document.querySelector("#btnTerminerCourse");
+  const blocCoursesProches = document.querySelector("#titreCoursesProches");
 
   let estDisponible = false;
   let intervalPosition = null;
   let intervalCourses = null;
+
+  // Normalise un numéro ivoirien en format international pour wa.me
+  function normaliserPourWhatsApp(telephone) {
+    const chiffres = (telephone || "").replace(/\D/g, "");
+    if (chiffres.startsWith("225")) return chiffres;
+    if (chiffres.startsWith("0")) return "225" + chiffres.slice(1);
+    return "225" + chiffres;
+  }
+
+  function afficherCourseEnCours(course) {
+    if (!courseEnCours) return;
+
+    courseEnCours.dataset.id = course.id;
+    if (courseEnCoursClient) {
+      courseEnCoursClient.textContent = `Client : ${course.nom_client} — ${course.telephone_client}`;
+    }
+    if (courseEnCoursDepart) {
+      courseEnCoursDepart.textContent = `Départ : ${course.depart_adresse || `${course.depart_lat}, ${course.depart_lng}`}`;
+    }
+    if (courseEnCoursDestination) {
+      courseEnCoursDestination.textContent = `Destination : ${course.destination_adresse || `${course.destination_lat}, ${course.destination_lng}`}`;
+    }
+    if (courseEnCoursAppeler) courseEnCoursAppeler.href = `tel:${course.telephone_client || ""}`;
+    if (courseEnCoursWhatsapp) {
+      courseEnCoursWhatsapp.href = `https://wa.me/${normaliserPourWhatsApp(course.telephone_client)}`;
+    }
+
+    courseEnCours.style.display = "block";
+
+    // Une course en cours masque la liste des courses proches (le chauffeur
+    // est occupé, pas de raison de lui montrer d'autres opportunités) et
+    // arrête le sondage tant qu'elle n'est pas terminée.
+    if (blocCoursesProches) blocCoursesProches.style.display = "none";
+    if (listeCoursesProches) listeCoursesProches.style.display = "none";
+    clearInterval(intervalCourses);
+  }
+
+  function masquerCourseEnCours() {
+    if (courseEnCours) {
+      courseEnCours.style.display = "none";
+      delete courseEnCours.dataset.id;
+    }
+    if (blocCoursesProches) blocCoursesProches.style.display = "";
+    if (listeCoursesProches) listeCoursesProches.style.display = "";
+    if (estDisponible) {
+      chargerCoursesProches();
+      intervalCourses = setInterval(chargerCoursesProches, 8000);
+    }
+  }
 
   function construireCarteCourse(course) {
     const distance = course.distance_km != null ? `${course.distance_km} km` : "";
@@ -467,6 +537,15 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
     });
   }
 
+  // Au chargement de la page : si une course est déjà en cours (ex. le
+  // chauffeur a rechargé la page), on la réaffiche directement plutôt que
+  // de perdre le contact du client.
+  (async function verifierCourseActive() {
+    const reponse = await requeteAPI("/courses");
+    const active = reponse?.courses?.find((c) => c.statut === "Acceptée" || c.statut === "En cours");
+    if (active) afficherCourseEnCours(active);
+  })();
+
   if (btnToggleDisponibilite) {
     btnToggleDisponibilite.addEventListener("click", async () => {
       estDisponible = !estDisponible;
@@ -486,12 +565,14 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
           body: JSON.stringify({ disponible: true }),
         });
         await envoyerPosition();
-        chargerCoursesProches();
 
         // Position rafraîchie toutes les 30s, liste des courses toutes les 8s,
         // tant que la disponibilité reste active et la page ouverte.
         intervalPosition = setInterval(envoyerPosition, 30000);
-        intervalCourses = setInterval(chargerCoursesProches, 8000);
+        if (courseEnCours?.style.display !== "block") {
+          chargerCoursesProches();
+          intervalCourses = setInterval(chargerCoursesProches, 8000);
+        }
       } else {
         btnToggleDisponibilite.textContent = "Activer ma disponibilité";
         btnToggleDisponibilite.classList.remove("btn-delete");
@@ -529,8 +610,28 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
         return;
       }
 
-      afficherNotification("Course acceptée ! Le client a été prévenu.", "success");
-      chargerCoursesProches();
+      afficherNotification("Course acceptée ! Contactez le client dès que possible.", "success");
+      afficherCourseEnCours(reponse.course);
+    });
+  }
+
+  if (btnTerminerCourse) {
+    btnTerminerCourse.addEventListener("click", async () => {
+      const id = courseEnCours?.dataset.id;
+      if (!id) return;
+
+      const reponse = await requeteAPI(`/courses/${id}/statut`, {
+        method: "PUT",
+        body: JSON.stringify({ statut: "Terminée" }),
+      });
+
+      if (!reponse?.course) {
+        afficherNotification("Impossible de terminer la course pour le moment.", "error");
+        return;
+      }
+
+      afficherNotification("Course terminée avec succès.", "success");
+      masquerCourseEnCours();
     });
   }
 }
