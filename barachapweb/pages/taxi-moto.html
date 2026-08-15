@@ -115,8 +115,18 @@
           <!-- Vue de suivi après commande — masquée par défaut -->
           <div id="courseSuivi" class="demande-form" style="display: none; text-align: center;">
             <h3 id="courseSuiviTitre">Recherche d'un chauffeur...</h3>
-            <div class="spinner" style="margin: 20px auto; width: 40px; height: 40px;"></div>
+            <div class="spinner" id="courseSuiviSpinner" style="margin: 20px auto; width: 40px; height: 40px;"></div>
             <p id="courseSuiviDetail" style="color: #666;"></p>
+
+            <!-- Contact du chauffeur — affiché une fois la course acceptée -->
+            <div id="chauffeurContact" style="display: none; margin-top: 16px;">
+              <p><strong id="chauffeurNom"></strong></p>
+              <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap;">
+                <a id="chauffeurAppeler" class="btn-secondary" href="#" style="text-decoration: none;">Appeler</a>
+                <a id="chauffeurWhatsapp" class="btn-secondary" href="#" target="_blank" rel="noopener" style="text-decoration: none;">WhatsApp</a>
+              </div>
+            </div>
+
             <button class="btn-delete" id="btnAnnulerCourse" style="margin-top: 20px;">Annuler la course</button>
           </div>
         </div>
