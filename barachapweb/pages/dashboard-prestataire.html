@@ -137,7 +137,21 @@
         <!-- Section Taxi-moto — affichée uniquement si le prestataire a ce
              métier (voir prestataire.js). Disponibilité + courses proches. -->
         <div id="sectionTaxiMoto" style="display: none;">
-          <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+          <!-- Course en cours — masquée par défaut, affichée dès qu'une
+               course est acceptée, avec le contact direct du client -->
+          <div id="courseEnCours" class="demande-form" style="display: none; max-width: 700px; margin-bottom: 40px;">
+            <h3 style="margin-bottom: 16px;">Course en cours</h3>
+            <p><strong id="courseEnCoursClient"></strong></p>
+            <p id="courseEnCoursDepart"></p>
+            <p id="courseEnCoursDestination"></p>
+            <div style="display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap;">
+              <a id="courseEnCoursAppeler" class="btn-secondary" href="#" style="text-decoration: none;">Appeler le client</a>
+              <a id="courseEnCoursWhatsapp" class="btn-secondary" href="#" target="_blank" rel="noopener" style="text-decoration: none;">WhatsApp</a>
+            </div>
+            <button class="btn-primary" id="btnTerminerCourse" type="button">Terminer la course</button>
+          </div>
+
+          <div class="section-title" id="titreCoursesProches" style="margin-bottom: 20px; text-align: left;">
             <h3>Courses taxi-moto à proximité</h3>
             <p>Activez votre disponibilité pour voir et accepter les courses proches de vous</p>
           </div>
@@ -209,30 +223,34 @@
           </table>
         </div>
 
-        <div class="section-title" style="margin-bottom: 20px; text-align: left;">
-          <h3>Mes services actifs</h3>
+        <div id="blocServices">
+          <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+            <h3>Mes services actifs</h3>
+          </div>
+
+          <div class="services-container" id="mesServicesActifs" style="margin-bottom: 40px;">
+            <div class="service-card">
+              <h3>Réparation de fuite</h3>
+              <p>Intervention rapide sur fuites tuyauterie et robinetterie</p>
+            </div>
+            <div class="service-card">
+              <h3>Installation sanitaire</h3>
+              <p>Pose de lavabos, W.C, chauffe-eau et canalisations</p>
+            </div>
+            <div class="service-card">
+              <h3>Débouchage</h3>
+              <p>Débouchage haute pression des canalisations bouchées</p>
+            </div>
+          </div>
         </div>
 
-        <div class="services-container" id="mesServicesActifs" style="margin-bottom: 40px;">
-          <div class="service-card">
-            <h3>Réparation de fuite</h3>
-            <p>Intervention rapide sur fuites tuyauterie et robinetterie</p>
+        <div id="blocRealisations">
+          <div class="section-title" style="margin-bottom: 20px; text-align: left;">
+            <h3>Mes réalisations</h3>
           </div>
-          <div class="service-card">
-            <h3>Installation sanitaire</h3>
-            <p>Pose de lavabos, W.C, chauffe-eau et canalisations</p>
-          </div>
-          <div class="service-card">
-            <h3>Débouchage</h3>
-            <p>Débouchage haute pression des canalisations bouchées</p>
-          </div>
-        </div>
 
-        <div class="section-title" style="margin-bottom: 20px; text-align: left;">
-          <h3>Mes réalisations</h3>
+          <div class="galerie" id="mesRealisations" style="margin-bottom: 40px;"></div>
         </div>
-
-        <div class="galerie" id="mesRealisations" style="margin-bottom: 40px;"></div>
       </section>
     </main>
 
