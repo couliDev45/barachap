@@ -76,17 +76,21 @@ if (lienConnexion) {
 // Icône Taxi-moto dans la navigation, sur toutes les pages (la réservation
 // elle-même reste ouverte à tous, la connexion n'est demandée qu'au moment
 // de commander — même logique que pour une demande de service classique).
+// Emoji plutôt qu'une image : pas de fichier à charger, donc pas de risque
+// d'image cassée (chemin ou casse incorrecte) qui casse l'alignement.
+// Inséré juste avant Connexion/Déconnexion (comme "Mon espace") plutôt qu'en
+// tout premier — pour éviter tout style CSS propre au "premier" élément de
+// la nav qui pourrait expliquer un désalignement.
 if (nav) {
   const nomPageActuelle = window.location.pathname.split("/").pop();
 
   if (nomPageActuelle !== "taxi-moto.html") {
     const dansPages = window.location.pathname.includes("/pages/");
     const profondeur = dansPages ? "" : "pages/";
-    const prefixeAssets = dansPages ? "../" : "";
 
     const lienTaxi = document.createElement("a");
     lienTaxi.href = `${profondeur}taxi-moto.html`;
-    lienTaxi.innerHTML = `<img src="${prefixeAssets}assets/icones/taxi-icon.jpg" alt="" style="width: 18px; height: 18px; vertical-align: middle; border-radius: 4px; margin-right: 6px; object-fit: cover;" />Taxi-moto`;
+    lienTaxi.textContent = "🏍️ Taxi-moto";
 
     if (navToggle) {
       lienTaxi.addEventListener("click", () => {
@@ -95,7 +99,12 @@ if (nav) {
       });
     }
 
-    // Inséré en tête de nav pour une bonne visibilité
-    nav.insertBefore(lienTaxi, nav.firstChild);
+    const pointInsertion = document.querySelector('.nav a[href$="connexion.html"]');
+    if (pointInsertion) {
+      nav.insertBefore(lienTaxi, pointInsertion);
+    } else {
+      // Page sans lien connexion.html dans sa nav (ex: connexion.html elle-même)
+      nav.appendChild(lienTaxi);
+    }
   }
 }
