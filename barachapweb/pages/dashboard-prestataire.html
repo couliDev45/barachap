@@ -143,8 +143,11 @@
             <h3 style="margin-bottom: 16px;">Course en cours</h3>
             <p><strong id="courseEnCoursClient"></strong></p>
             <p id="courseEnCoursDepart"></p>
+            <audio id="courseEnCoursDepartAudio" controls style="display: none; width: 100%; margin-bottom: 8px;"></audio>
             <p id="courseEnCoursDestination"></p>
+            <audio id="courseEnCoursDestinationAudio" controls style="display: none; width: 100%; margin-bottom: 8px;"></audio>
             <div style="display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap;">
+              <button class="btn-secondary" id="courseEnCoursLire" type="button">🔊 Lire la carte</button>
               <a id="courseEnCoursAppeler" class="btn-secondary" href="#" style="text-decoration: none;">Appeler le client</a>
               <a id="courseEnCoursWhatsapp" class="btn-secondary" href="#" target="_blank" rel="noopener" style="text-decoration: none;">WhatsApp</a>
             </div>

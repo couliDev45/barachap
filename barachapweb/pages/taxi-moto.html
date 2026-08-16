@@ -14,7 +14,6 @@
       href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <link rel="stylesheet" href="../css/variables.css" />
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/responsive.css" />
@@ -63,44 +62,70 @@
 
           <h2 id="courseFormTitre">Commander une moto</h2>
           <div class="demande-form" id="courseForm">
-            <label for="departAdresseInput">Point de départ</label>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-              <input
-                type="text"
-                id="departAdresseInput"
-                placeholder="Tapez une adresse (ex: Marché central, Séguéla)"
-                style="flex: 1;"
-              />
-              <button type="button" class="btn-primary" id="btnRechercherDepart" style="white-space: nowrap;">
-                Rechercher
+            <label for="departAdresseInput">Départ</label>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <div style="position: relative; flex: 1;">
+                <input
+                  type="text"
+                  id="departAdresseInput"
+                  placeholder="Tapez un lieu (ex: Marché central, quartier Bémasso...)"
+                  autocomplete="off"
+                />
+                <div
+                  id="departSuggestions"
+                  style="display: none; position: absolute; z-index: 1000; background: var(--white); border: 1px solid #ddd; border-radius: var(--radius-small); width: 100%; max-height: 220px; overflow-y: auto; box-shadow: var(--shadow-card);"
+                ></div>
+              </div>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="btnVocalDepart"
+                title="Enregistrer un message vocal pour le départ"
+                style="white-space: nowrap; flex-shrink: 0;"
+              >
+                🎤
               </button>
             </div>
-            <button type="button" class="btn-primary" id="btnMaPosition" style="margin-bottom: 12px;">
+            <p id="departVocalStatut" style="font-size: 13px; color: #666; margin-top: 6px;"></p>
+            <audio id="departVocalApercu" controls style="display: none; width: 100%; margin-top: 6px;"></audio>
+
+            <button type="button" class="btn-secondary" id="btnMaPosition" style="margin-top: 10px;">
               📍 Utiliser ma position actuelle
             </button>
-            <div id="carteDepart" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
-            <p id="departAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
-              Cliquez sur la carte, tapez une adresse, ou utilisez votre position actuelle.
-            </p>
 
-            <label for="destinationAdresseInput" style="margin-top: 24px;">Destination</label>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-              <input
-                type="text"
-                id="destinationAdresseInput"
-                placeholder="Tapez une adresse (ex: Gare routière, Séguéla)"
-                style="flex: 1;"
-              />
-              <button type="button" class="btn-primary" id="btnRechercherDestination" style="white-space: nowrap;">
-                Rechercher
+            <label for="destinationAdresseInput" style="margin-top: 20px;">Destination</label>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <div style="position: relative; flex: 1;">
+                <input
+                  type="text"
+                  id="destinationAdresseInput"
+                  placeholder="Tapez un lieu (ex: Gare routière, chez untel à Sokoura...)"
+                  autocomplete="off"
+                />
+                <div
+                  id="destinationSuggestions"
+                  style="display: none; position: absolute; z-index: 1000; background: var(--white); border: 1px solid #ddd; border-radius: var(--radius-small); width: 100%; max-height: 220px; overflow-y: auto; box-shadow: var(--shadow-card);"
+                ></div>
+              </div>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="btnVocalDestination"
+                title="Enregistrer un message vocal pour la destination"
+                style="white-space: nowrap; flex-shrink: 0;"
+              >
+                🎤
               </button>
             </div>
-            <div id="carteDestination" style="height: 240px; border-radius: var(--radius-small); border: 1px solid #ddd;"></div>
-            <p id="destinationAdresseLabel" style="font-size: 14px; color: #666; margin-top: 8px;">
-              Cliquez sur la carte pour indiquer où vous allez.
+            <p id="destinationVocalStatut" style="font-size: 13px; color: #666; margin-top: 6px;"></p>
+            <audio id="destinationVocalApercu" controls style="display: none; width: 100%; margin-top: 6px;"></audio>
+
+            <p style="font-size: 13px; color: #999; margin-top: 8px;">
+              Vous ne savez pas écrire ? Appuyez sur 🎤 et dites votre lieu de départ ou destination à voix haute.
+              Choisissez une suggestion si elle correspond, sinon continuez à taper ou parler — la course peut être commandée même si le lieu n'apparaît pas sur la carte.
             </p>
 
-            <label for="courseNom">Nom</label>
+            <label for="courseNom" style="margin-top: 20px;">Nom</label>
             <input type="text" id="courseNom" placeholder="Entrez votre nom" />
 
             <label for="courseTelephone">Téléphone</label>
@@ -108,7 +133,7 @@
 
             <div id="courseMessage"></div>
             <button class="btn-primary" type="button" id="btnCommanderMoto">
-              Commander la moto
+              Commander la course
             </button>
           </div>
 
@@ -167,7 +192,6 @@
       <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script type="module" src="../js/main.js"></script>
     <div id="notification" class="notification">
       <span id="notification-message"></span>
