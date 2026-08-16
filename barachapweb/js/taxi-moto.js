@@ -7,6 +7,11 @@
  *   beaucoup de lieux réels (quartiers, repères locaux) n'existent pas sur
  *   OpenStreetMap, la course doit pouvoir être commandée avec juste une
  *   description tapée à la main
+ * - note vocale possible à la place du texte (accessibilité pour les
+ *   personnes qui ne savent pas écrire) : enregistrement via MediaRecorder,
+ *   transcription automatique best-effort via l'API Web Speech du navigateur
+ *   (fiable surtout sur Chrome/Android — se dégrade proprement ailleurs, la
+ *   note vocale reste toujours utilisable même sans transcription)
  * - "Ma position actuelle" pour pré-remplir le départ
  * - soumission de la course (POST /api/courses) et suivi en direct par
  *   sondage (GET /api/courses) jusqu'à ce qu'un chauffeur accepte, avec
@@ -17,6 +22,7 @@
 
 import { lireStockage } from "./utils.js";
 import { requeteAPI } from "./api.js";
+import { uploaderAudio } from "./cloudinary.js";
 
 const courseForm = document.querySelector("#courseForm");
 
@@ -67,6 +73,107 @@ function initialiserFormulaireCourse() {
     depart: { lat: null, lng: null },
     destination: { lat: null, lng: null },
   };
+
+  // Note vocale par champ : le blob audio est uploadé seulement au moment de
+  // la soumission (pas à chaque enregistrement), la transcription (si captée)
+  // est gardée à part pour être envoyée en plus du texte.
+  const notesVocales = {
+    depart: { blob: null, transcription: null },
+    destination: { blob: null, transcription: null },
+  };
+
+  // --- Enregistrement vocal (accessibilité : pas besoin de savoir écrire) ---
+  // Utilise MediaRecorder (toujours disponible, capture l'audio pour lecture
+  // par le chauffeur) et, en parallèle, l'API Web Speech pour une
+  // transcription en direct quand le navigateur la supporte (surtout
+  // Chrome/Android) — jamais bloquant si elle échoue ou n'existe pas.
+
+  function initEnregistrementVocal(type) {
+    const bouton = document.querySelector(type === "depart" ? "#btnVocalDepart" : "#btnVocalDestination");
+    const statut = document.querySelector(type === "depart" ? "#departVocalStatut" : "#destinationVocalStatut");
+    const apercu = document.querySelector(type === "depart" ? "#departVocalApercu" : "#destinationVocalApercu");
+    const input = document.querySelector(type === "depart" ? "#departAdresseInput" : "#destinationAdresseInput");
+    if (!bouton) return;
+
+    const ReconnaissanceVocale = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let enregistreur = null;
+    let reconnaissance = null;
+    let morceaux = [];
+    let enCours = false;
+
+    function remettreEtatNormal() {
+      enCours = false;
+      bouton.textContent = "🎤";
+      bouton.classList.remove("btn-delete");
+      if (statut) {
+        statut.textContent = notesVocales[type].transcription
+          ? "Note vocale enregistrée et transcrite."
+          : "Note vocale enregistrée (transcription non disponible sur ce navigateur).";
+      }
+    }
+
+    bouton.addEventListener("click", async () => {
+      if (enCours) {
+        enregistreur?.stop();
+        reconnaissance?.stop();
+        return;
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        if (statut) statut.textContent = "L'enregistrement vocal n'est pas disponible sur cet appareil.";
+        return;
+      }
+
+      try {
+        const flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        morceaux = [];
+        enregistreur = new MediaRecorder(flux);
+        enregistreur.ondataavailable = (e) => morceaux.push(e.data);
+        enregistreur.onstop = () => {
+          flux.getTracks().forEach((piste) => piste.stop());
+          const blob = new Blob(morceaux, { type: "audio/webm" });
+          notesVocales[type].blob = blob;
+          if (apercu) {
+            apercu.src = URL.createObjectURL(blob);
+            apercu.style.display = "block";
+          }
+          remettreEtatNormal();
+        };
+        enregistreur.start();
+
+        // Transcription en direct, best-effort — n'empêche jamais
+        // l'enregistrement audio de fonctionner si elle échoue.
+        if (ReconnaissanceVocale) {
+          reconnaissance = new ReconnaissanceVocale();
+          reconnaissance.lang = "fr-FR";
+          reconnaissance.interimResults = false;
+          reconnaissance.onresult = (e) => {
+            const texte = Array.from(e.results)
+              .map((r) => r[0].transcript)
+              .join(" ");
+            notesVocales[type].transcription = texte;
+            if (input) input.value = texte;
+            points[type].lat = null;
+            points[type].lng = null;
+          };
+          reconnaissance.start();
+        }
+
+        enCours = true;
+        bouton.textContent = "⏹";
+        bouton.classList.add("btn-delete");
+        if (statut) statut.textContent = "🔴 Enregistrement en cours... appuyez à nouveau pour arrêter.";
+      } catch {
+        if (statut) {
+          statut.textContent = "Micro non autorisé. Vérifiez les permissions de votre navigateur.";
+        }
+      }
+    });
+  }
+
+  initEnregistrementVocal("depart");
+  initEnregistrementVocal("destination");
 
   // --- Autocomplétion (suggestions en direct pendant la saisie) ---
 
@@ -196,31 +303,47 @@ function initialiserFormulaireCourse() {
 
   // --- Soumission de la course ---
   // Seuls le nom, le téléphone, et les deux textes (départ/destination) sont
-  // obligatoires — jamais les coordonnées : le service doit rester utilisable
-  // même pour un lieu introuvable sur la carte.
+  // obligatoires — jamais les coordonnées, jamais une transcription réussie :
+  // si une note vocale existe mais n'a pas pu être transcrite (navigateur
+  // sans support), un texte de repli suffit pour ne jamais bloquer l'envoi.
 
   const btnCommanderMoto = document.querySelector("#btnCommanderMoto");
   if (btnCommanderMoto) {
     btnCommanderMoto.addEventListener("click", async () => {
       const nom = courseNom?.value.trim();
       const telephone = courseTelephone?.value.trim();
-      const departTexte = document.querySelector("#departAdresseInput")?.value.trim();
-      const destinationTexte = document.querySelector("#destinationAdresseInput")?.value.trim();
+
+      const departTexte =
+        document.querySelector("#departAdresseInput")?.value.trim() ||
+        (notesVocales.depart.blob ? "Note vocale (voir audio)" : "");
+      const destinationTexte =
+        document.querySelector("#destinationAdresseInput")?.value.trim() ||
+        (notesVocales.destination.blob ? "Note vocale (voir audio)" : "");
 
       if (!nom || !telephone) {
         afficherMessageCourse("Veuillez indiquer votre nom et votre téléphone.");
         return;
       }
       if (!departTexte) {
-        afficherMessageCourse("Veuillez indiquer votre point de départ.");
+        afficherMessageCourse("Veuillez indiquer votre point de départ (texte ou note vocale).");
         return;
       }
       if (!destinationTexte) {
-        afficherMessageCourse("Veuillez indiquer votre destination.");
+        afficherMessageCourse("Veuillez indiquer votre destination (texte ou note vocale).");
         return;
       }
 
       btnCommanderMoto.disabled = true;
+
+      let departAudioUrl = null;
+      let destinationAudioUrl = null;
+
+      if (notesVocales.depart.blob || notesVocales.destination.blob) {
+        afficherMessageCourse("Envoi des notes vocales...");
+        if (notesVocales.depart.blob) departAudioUrl = await uploaderAudio(notesVocales.depart.blob);
+        if (notesVocales.destination.blob) destinationAudioUrl = await uploaderAudio(notesVocales.destination.blob);
+      }
+
       afficherMessageCourse("");
 
       const reponse = await requeteAPI("/courses", {
@@ -231,9 +354,13 @@ function initialiserFormulaireCourse() {
           departLat: points.depart.lat,
           departLng: points.depart.lng,
           departAdresse: departTexte,
+          departAudioUrl,
+          departTranscription: notesVocales.depart.transcription,
           destinationLat: points.destination.lat,
           destinationLng: points.destination.lng,
           destinationAdresse: destinationTexte,
+          destinationAudioUrl,
+          destinationTranscription: notesVocales.destination.transcription,
         }),
       });
 

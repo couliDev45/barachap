@@ -447,6 +447,19 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
   let estDisponible = false;
   let intervalPosition = null;
   let intervalCourses = null;
+  let coursesProchesActuelles = [];
+
+  // Lecture à voix haute de la carte de commande (accessibilité pour un
+  // chauffeur qui ne sait pas lire) — fonctionne sur la quasi-totalité des
+  // navigateurs, contrairement à la transcription vocale côté client.
+  function lireCarteAudio(course) {
+    if (!window.speechSynthesis) return;
+    const texte = `Nouvelle course. Départ : ${course.depart_adresse}. Destination : ${course.destination_adresse}. Client : ${course.nom_client}, téléphone ${course.telephone_client}.`;
+    const lecture = new SpeechSynthesisUtterance(texte);
+    lecture.lang = "fr-FR";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(lecture);
+  }
 
   function afficherCourseEnCours(course) {
     if (!courseEnCours) return;
@@ -461,6 +474,31 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
     if (courseEnCoursDestination) {
       courseEnCoursDestination.textContent = `Destination : ${course.destination_adresse || `${course.destination_lat}, ${course.destination_lng}`}`;
     }
+
+    const departAudio = document.querySelector("#courseEnCoursDepartAudio");
+    if (departAudio) {
+      if (course.depart_audio_url) {
+        departAudio.src = course.depart_audio_url;
+        departAudio.style.display = "block";
+      } else {
+        departAudio.style.display = "none";
+      }
+    }
+    const destinationAudio = document.querySelector("#courseEnCoursDestinationAudio");
+    if (destinationAudio) {
+      if (course.destination_audio_url) {
+        destinationAudio.src = course.destination_audio_url;
+        destinationAudio.style.display = "block";
+      } else {
+        destinationAudio.style.display = "none";
+      }
+    }
+
+    const courseEnCoursLire = document.querySelector("#courseEnCoursLire");
+    if (courseEnCoursLire) {
+      courseEnCoursLire.onclick = () => lireCarteAudio(course);
+    }
+
     if (courseEnCoursAppeler) courseEnCoursAppeler.href = `tel:${course.telephone_client || ""}`;
     if (courseEnCoursWhatsapp) {
       courseEnCoursWhatsapp.href = `https://wa.me/${normaliserPourWhatsApp(course.telephone_client)}`;
@@ -491,15 +529,24 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
 
   function construireCarteCourse(course) {
     const distance = course.distance_km != null ? `${course.distance_km} km` : "";
+    const departAudio = course.depart_audio_url
+      ? `<audio controls src="${course.depart_audio_url}" style="width: 100%; margin: 4px 0;"></audio>`
+      : "";
+    const destinationAudio = course.destination_audio_url
+      ? `<audio controls src="${course.destination_audio_url}" style="width: 100%; margin: 4px 0;"></audio>`
+      : "";
     return `
       <div class="prestataire-card" data-id="${course.id}">
         <div class="card-header">
           <h3>Course ${distance ? `— ${distance}` : ""}</h3>
         </div>
         <p><strong>Départ :</strong> ${echapperHTML(course.depart_adresse || `${course.depart_lat}, ${course.depart_lng}`)}</p>
+        ${departAudio}
         <p><strong>Destination :</strong> ${echapperHTML(course.destination_adresse || `${course.destination_lat}, ${course.destination_lng}`)}</p>
+        ${destinationAudio}
         <p><strong>Client :</strong> ${echapperHTML(course.nom_client)}</p>
         <div class="dashboard-actions">
+          <button class="btn-secondary btn-lire-course" type="button">🔊 Lire</button>
           <button class="btn-success btn-accepter-course">Accepter cette course</button>
         </div>
       </div>
@@ -509,10 +556,10 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
   async function chargerCoursesProches() {
     if (!listeCoursesProches) return;
     const reponse = await requeteAPI("/courses/disponibles");
-    const courses = reponse?.courses || [];
+    coursesProchesActuelles = reponse?.courses || [];
 
-    listeCoursesProches.innerHTML = courses.length
-      ? courses.map(construireCarteCourse).join("")
+    listeCoursesProches.innerHTML = coursesProchesActuelles.length
+      ? coursesProchesActuelles.map(construireCarteCourse).join("")
       : `<div class="etat-vide"><p>Aucune course à proximité pour le moment.</p></div>`;
   }
 
@@ -583,6 +630,15 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
 
   if (listeCoursesProches) {
     listeCoursesProches.addEventListener("click", async (e) => {
+      const btnLire = e.target.closest(".btn-lire-course");
+      if (btnLire) {
+        const carte = btnLire.closest("[data-id]");
+        const id = carte?.dataset.id;
+        const course = coursesProchesActuelles.find((c) => String(c.id) === id);
+        if (course) lireCarteAudio(course);
+        return;
+      }
+
       const btn = e.target.closest(".btn-accepter-course");
       if (!btn) return;
 
