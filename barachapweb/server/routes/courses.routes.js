@@ -39,10 +39,29 @@ function sqlDistanceKm(latParam, lngParam, colLat, colLng) {
  * suggestion choisie côté client), jamais un blocage. Beaucoup de lieux
  * réels n'existent pas sur OpenStreetMap, surtout dans les zones moins
  * couvertes : le client doit pouvoir commander avec une simple description.
+ *
+ * Accessibilité : departAdresse/destinationAdresse peuvent provenir d'une
+ * transcription vocale automatique plutôt que d'une saisie tapée (voir
+ * taxi-moto.js) — le champ texte reste toujours rempli d'une façon ou d'une
+ * autre, donc aucune logique particulière n'est nécessaire ici pour ce cas.
+ * depart_audio_url/destination_audio_url permettent au chauffeur d'écouter
+ * la note vocale d'origine en plus de la transcription.
  */
 router.post("/", async (req, res) => {
-  const { nom, telephone, departLat, departLng, departAdresse, destinationLat, destinationLng, destinationAdresse } =
-    req.body;
+  const {
+    nom,
+    telephone,
+    departLat,
+    departLng,
+    departAdresse,
+    departAudioUrl,
+    departTranscription,
+    destinationLat,
+    destinationLng,
+    destinationAdresse,
+    destinationAudioUrl,
+    destinationTranscription,
+  } = req.body;
   const clientId = req.user.id;
 
   if (!nom || !telephone || !departAdresse?.trim() || !destinationAdresse?.trim()) {
@@ -51,8 +70,8 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await query(
-      `INSERT INTO courses (client_id, nom_client, telephone_client, depart_lat, depart_lng, depart_adresse, destination_lat, destination_lng, destination_adresse, statut)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'En attente')
+      `INSERT INTO courses (client_id, nom_client, telephone_client, depart_lat, depart_lng, depart_adresse, depart_audio_url, depart_transcription, destination_lat, destination_lng, destination_adresse, destination_audio_url, destination_transcription, statut)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'En attente')
        RETURNING *`,
       [
         clientId,
@@ -61,9 +80,13 @@ router.post("/", async (req, res) => {
         departLat ?? null,
         departLng ?? null,
         departAdresse.trim(),
+        departAudioUrl || null,
+        departTranscription || null,
         destinationLat ?? null,
         destinationLng ?? null,
         destinationAdresse.trim(),
+        destinationAudioUrl || null,
+        destinationTranscription || null,
       ],
     );
 
