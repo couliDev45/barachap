@@ -93,7 +93,11 @@ if (inscriptionForm) {
     }
 
     const submitButton = inscriptionForm.querySelector("button[type='submit']");
-    if (submitButton) submitButton.disabled = true;
+    const texteOriginalBouton = submitButton?.textContent;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Création de compte en cours...`;
+    }
 
     const reponse = await requeteAPI("/auth/register", {
       method: "POST",
@@ -107,7 +111,10 @@ if (inscriptionForm) {
       }),
     });
 
-    if (submitButton) submitButton.disabled = false;
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = texteOriginalBouton;
+    }
 
     if (!reponse || !reponse.token) {
       afficherNotification(
@@ -152,14 +159,21 @@ if (connexionForm) {
     }
 
     const submitButton = connexionForm.querySelector("button[type='submit']");
-    if (submitButton) submitButton.disabled = true;
+    const texteOriginalBouton = submitButton?.textContent;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Connexion en cours...`;
+    }
 
     const reponse = await requeteAPI("/auth/login", {
       method: "POST",
       body: JSON.stringify({ identifiant, password: motdepasse, typeCompte }),
     });
 
-    if (submitButton) submitButton.disabled = false;
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = texteOriginalBouton;
+    }
 
     if (!reponse || !reponse.token) {
       afficherNotification("Identifiant ou mot de passe incorrect.", "error");
