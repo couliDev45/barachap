@@ -63,7 +63,9 @@ async function chargerStatsAdmin() {
   if (totalDemandesEl) totalDemandesEl.textContent = stats.totalDemandes;
 }
 
-chargerStatsAdmin();
+if (document.querySelector("#statTotalUsers")) {
+  chargerStatsAdmin();
+}
 
 // --- Validation des prestataires en attente ---
 
