@@ -43,6 +43,29 @@ router.get("/prestataire/:id", async (req, res) => {
 });
 
 /**
+ * GET /api/avis/populaires
+ * Avis récents et bien notés (note >= 4, avec commentaire) pour la section
+ * "Ce que nos utilisateurs disent" de l'accueil. Public, pas de JWT requis.
+ */
+router.get("/populaires", async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT avis.note, avis.commentaire, avis.created_at, users.nom_complet AS nom_client
+       FROM avis
+       JOIN users ON users.id = avis.client_id
+       WHERE avis.note >= 4 AND avis.commentaire IS NOT NULL AND avis.commentaire != ''
+       ORDER BY avis.created_at DESC
+       LIMIT 3`,
+    );
+
+    res.json({ avis: result.rows });
+  } catch (err) {
+    console.error("Erreur Avis Populaires :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération des avis à la une." });
+  }
+});
+
+/**
  * POST /api/avis
  * Le client connecté laisse un avis sur une de ses propres demandes,
  * uniquement si elle est acceptée et n'a pas déjà été notée.

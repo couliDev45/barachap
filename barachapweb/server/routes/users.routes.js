@@ -57,6 +57,38 @@ router.get("/prestataires", async (req, res) => {
 });
 
 /**
+ * GET /api/users/prestataires/populaires
+ * Les prestataires les plus actifs, mesurés par le nombre d'opérations
+ * réellement effectuées : demandes acceptées (métiers classiques) +
+ * courses terminées (taxi-moto). Doit être déclarée AVANT /prestataires/:id
+ * pour qu'Express ne confonde pas "populaires" avec un id numérique.
+ * Public — utilisée pour "Nos prestataires à la une" sur l'accueil.
+ */
+router.get("/prestataires/populaires", async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT
+        users.id, users.nom_complet, users.metier, users.ville, users.quartier, users.photo_url,
+        (SELECT ROUND(AVG(note), 1) FROM avis WHERE avis.prestataire_id = users.id) AS note_moyenne,
+        (
+          (SELECT COUNT(*) FROM demandes WHERE demandes.prestataire_id = users.id AND demandes.statut = 'Acceptée')
+          +
+          (SELECT COUNT(*) FROM courses WHERE courses.chauffeur_id = users.id AND courses.statut = 'Terminée')
+        ) AS nombre_operations
+      FROM users
+      WHERE role = 'prestataire' AND statut_validation = 'Validé'
+      ORDER BY nombre_operations DESC, users.created_at ASC
+      LIMIT 3
+    `);
+
+    res.json({ prestataires: result.rows });
+  } catch (err) {
+    console.error("Erreur Prestataires Populaires :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération des prestataires à la une." });
+  }
+});
+
+/**
  * GET /api/users/prestataires/:id
  * Récupère le profil d'un prestataire par son ID
  */
