@@ -5,6 +5,11 @@
   "trailingSlash": false,
   "routes": [
     {
+      "src": "/sw.js",
+      "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      "continue": true
+    },
+    {
       "src": "/admin",
       "dest": "/pages/dashboard-admin.html"
     },
