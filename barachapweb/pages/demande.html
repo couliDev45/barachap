@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BaraChap - Trouvez un professionnel facilement</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#FF8C42" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BaraChap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <img src="../assets/logo/logo-color.png" alt="logobarachap" />
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
+      </nav>
+    </header>
+    <main>
+      <section class="form-section">
+        <div class="form-content">
+          <a href="profil.html" class="btn-primary retour-btn">Retour</a>
+
+          <!-- Barrière de connexion : affichée à la place du formulaire tant
+               que l'utilisateur n'est pas connecté (voir demande.js) -->
+          <div id="gateConnexion" class="demande-form" style="display: none; text-align: center;">
+            <h2>Connectez-vous pour envoyer votre demande</h2>
+            <p style="margin-bottom: 24px;">
+              Un compte est nécessaire pour qu'un prestataire puisse vous recontacter et suivre votre demande.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+              <a href="connexion.html" id="gateLienConnexion" class="btn-primary" style="text-decoration: none;">Se connecter</a>
+              <a href="inscription.html" id="gateLienInscription" class="btn-primary" style="text-decoration: none;">Créer un compte</a>
+            </div>
+          </div>
+
+          <h2 id="demandeFormTitre">Demande de service</h2>
+          <form class="demande-form" id="demandeForm">
+            <label for="prestation">Type de prestation</label>
+            <select name="prestation" id="prestation" required>
+              <option value="" selected disabled>
+                Sélectionnez une prestation
+              </option>
+              <option value="maçonnerie">Maçonnerie</option>
+              <option value="plomberie">Plomberie</option>
+              <option value="electricite">Électricité</option>
+              <option value="couture">Couture</option>
+              <option value="coiffure">Coiffure</option>
+              <option value="autres">Autres</option>
+            </select>
+            <label for="nom">Nom</label>
+            <input
+              type="text"
+              id="nom"
+              name="nom"
+              placeholder="Entrez votre nom"
+              required
+            />
+            <label for="prenom">Prénom</label>
+            <input
+              type="text"
+              id="prenom"
+              name="prenom"
+              placeholder="Entrez votre prenom"
+            />
+            <label for="telephone">Téléphone</label>
+            <input
+              type="tel"
+              id="telephone"
+              name="telephone"
+              placeholder="Entrez un numéro joignable"
+              required
+            />
+            <label for="besoin">Description de votre besoin</label>
+            <textarea
+              name="besoin"
+              id="besoin"
+              rows="5"
+              placeholder="Décrivez votre problème"
+              required
+            ></textarea>
+            <label for="date">Date souhaitée</label>
+            <input type="date" id="date" name="date" required />
+            <label for="ville">Ville/Quartier</label>
+            <input
+              type="text"
+              id="ville"
+              name="ville"
+              placeholder="Ville/quartier"
+              required
+            />
+            <label for="photo"> Ajouter une photo (facultatif) </label>
+            <input type="file" id="photo" name="photo" accept="image/*" />
+            <div id="message"></div>
+            <button class="btn-primary" type="submit">
+              Envoyez la demande
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- <script>
+      const navToggle = document.querySelector(".nav-toggle");
+      const nav = document.querySelector(".nav");
+
+      navToggle.addEventListener("click", () => {
+        const isOpen = nav.classList.toggle("nav-open");
+        navToggle.setAttribute("aria-expanded", isOpen);
+      });
+
+      // ferme le menu quand on clique sur un lien (mobile)
+      nav.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+          nav.classList.remove("nav-open");
+          navToggle.setAttribute("aria-expanded", "false");
+        });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          nav.classList.remove("nav-open");
+
+          navToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+    </script> -->
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" loading="lazy" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>

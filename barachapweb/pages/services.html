@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BaraChap - Trouvez un professionnel facilement</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#FF8C42" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BaraChap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <img src="../assets/logo/logo-color.png" alt="logobarachap" />
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
+      </nav>
+    </header>
+    <section class="hero" id="services">
+      <div class="hero-content">
+        <h2>Rechercher un professionnel</h2>
+        <div>
+          <p>trouvez rapidement un prestataire selon vos besoins.</p>
+        </div>
+        <div class="search-bar">
+          <input
+            type="search"
+            placeholder="Quel service recherchez-vous ? Ex : plombier"
+          />
+          <button class="btn-primary">Rechercher</button>
+        </div>
+        <div class="categories">
+          <h3>categories</h3>
+          <button class="btn-primary filter-btn" data-filter="all">Tous</button>
+          <button class="btn-primary filter-btn" data-filter="taxi-moto">
+            Taxi-moto
+          </button>
+          <button class="btn-primary filter-btn" data-filter="plombier">
+            Plombier
+          </button>
+          <button class="btn-primary filter-btn" data-filter="electricien">
+            Électricien
+          </button>
+          <button class="btn-primary filter-btn" data-filter="macon">
+            Maçon
+          </button>
+          <button class="btn-primary filter-btn" data-filter="peintre">
+            peintre
+          </button>
+          <button class="btn-primary filter-btn" data-filter="couturier">
+            Couturier
+          </button>
+          <button class="btn-primary filter-btn" data-filter="mecanicien">
+            Mécanicien
+          </button>
+          <button class="btn-primary filter-btn" data-filter="menuisier">
+            Menuisier
+          </button>
+        </div>
+      </div>
+    </section>
+    <!-- les prestataires -->
+    <section class="advantages">
+      <div class="advantages-container" id="prestatairesGrid">
+        <div class="advantage-card" data-category="plombier">
+          <!-- COMMENTAIRE IMAGE: Photo de Kouassi Abou -->
+          <img src="../assets/images/prestataire1.png" alt="prestataire" loading="lazy" />
+          <h3>Kouassi Abou</h3>
+          <p class="metier">plombier</p>
+          <span>Séguéla</span>
+          <div class="rating-badge">Note: 5.0 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="electricien">
+          <!-- COMMENTAIRE IMAGE: Photo de Moussa Traoré -->
+          <img src="../assets/images/prestataire1.png" alt="prestataire" loading="lazy" />
+          <h3>Moussa Traoré</h3>
+          <p class="metier">Électricien</p>
+          <span>Kani</span>
+          <div class="rating-badge">Note: 4.9 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="macon">
+          <!-- COMMENTAIRE IMAGE: Photo de Hamed Koné -->
+          <img src="../assets/images/prestataire2.png" alt="prestataire" loading="lazy" />
+          <h3>Hamed Koné</h3>
+          <p class="metier">Maçon</p>
+          <span>Bobi</span>
+          <div class="rating-badge">Note: 4.8 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="coiffeur">
+          <!-- COMMENTAIRE IMAGE: Photo d'Esther Bamba -->
+          <img src="../assets/images/prestataire3.png" alt="prestataire" loading="lazy" />
+          <h3>Esther Bamba</h3>
+          <p class="metier">Coiffeuse</p>
+          <span>Daloa</span>
+          <div class="rating-badge">Note: 5.0 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="taxi-moto">
+          <!-- COMMENTAIRE IMAGE: Photo d'Ouédraogo Ibrahim -->
+          <img src="../assets/images/prestataire2.png" alt="prestataire" loading="lazy" />
+          <h3>Ouédraogo Ibrahim</h3>
+          <p class="metier">Chauffeur</p>
+          <span>Bouaké</span>
+          <div class="rating-badge">Note: 4.7 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="couturier">
+          <!-- COMMENTAIRE IMAGE: Photo de Koné Ibrahim -->
+          <img src="../assets/images/prestataire2.png" alt="prestataire" loading="lazy" />
+          <h3>Koné Ibrahim</h3>
+          <p class="metier">Couturier</p>
+          <span>Séguéla</span>
+          <div class="rating-badge">Note: 4.9 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+        <div class="advantage-card" data-category="menusier">
+          <!-- COMMENTAIRE IMAGE: Photo d'Amara Bamba -->
+          <img src="../assets/images/prestataire3.png" alt="prestataire" loading="lazy" />
+          <h3>Amara Bamba</h3>
+          <p class="metier">Menuisier</p>
+          <span>Daloa</span>
+          <div class="rating-badge">Note: 4.6 / 5</div>
+          <a href="profil.html" class="btn-primary"> Voir le profil </a>
+        </div>
+      </div>
+    </section>
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" loading="lazy" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>
