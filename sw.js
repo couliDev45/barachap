@@ -73,6 +73,17 @@ self.addEventListener("fetch", (event) => {
  * POST /api/courses dans courses.routes.js, déclenché à chaque nouvelle
  * course). Fonctionne même si la PWA est fermée ou le téléphone verrouillé
  * — c'est tout l'intérêt du Service Worker par rapport au simple sondage.
+ *
+ * Aucune API web ne peut forcer l'allumage de l'écran (restriction
+ * volontaire des OS/navigateurs) — mais on maximise les chances que le
+ * chauffeur s'en rende compte immédiatement via :
+ * - un motif de vibration long et répété (façon sonnerie d'appel), plutôt
+ *   qu'un simple double-buzz
+ * - renotify: true + un tag fixe, pour que CHAQUE nouvelle course déclenche
+ *   à nouveau la vibration/le son, même si une notification précédente
+ *   n'a pas encore été balayée par le chauffeur
+ * - requireInteraction: true, pour que la notification reste affichée
+ *   jusqu'à ce que le chauffeur interagisse avec elle
  */
 self.addEventListener("push", (event) => {
   let data = {};
@@ -82,14 +93,23 @@ self.addEventListener("push", (event) => {
     data = { title: "BaraChap", body: event.data ? event.data.text() : "" };
   }
 
+  // Motif de vibration volontairement long et répété (en millisecondes :
+  // vibre, pause, vibre...) pour maximiser les chances d'être perçu même
+  // téléphone en poche ou sur une table, écran éteint.
+  const motifVibration = [400, 200, 400, 200, 400, 200, 400, 400, 400];
+
   const options = {
     body: data.body || "",
     icon: "/assets/logo/favicon-192.png",
     badge: "/assets/logo/favicon-192.png",
     data: { url: data.url || "/" },
-    vibrate: [200, 100, 200],
-    // Garde la notification visible jusqu'à ce que le chauffeur interagisse
-    // avec elle — une nouvelle course ne doit pas passer inaperçue.
+    vibrate: motifVibration,
+    // Tag fixe partagé par toutes les notifications de nouvelle course :
+    // combiné à renotify, ça garantit qu'une 2e course qui arrive pendant
+    // que la 1re n'a pas été vue redéclenche quand même vibration + son,
+    // au lieu d'être silencieusement fusionnée avec la précédente.
+    tag: "barachap-nouvelle-course",
+    renotify: true,
     requireInteraction: true,
   };
 
