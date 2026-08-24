@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administration - BaraChap</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../assets/logo/favicon-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../assets/logo/favicon-16.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/logo/favicon-180.png"
+    />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -27,7 +41,7 @@
     <header class="header">
       <div class="logo">
         <!-- COMMENTAIRE IMAGE: Logo principal BaraChap -->
-        <a href="../index.html" style="text-decoration: none;">
+        <a href="../index.html" style="text-decoration: none">
           <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
         </a>
       </div>
@@ -44,8 +58,12 @@
         <a href="../index.html#accueil">Accueil</a>
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
-        <a href="dashboard-admin.html" style="color: var(--orange-primary);">Panneau Admin</a>
-        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
+        <a href="dashboard-admin.html" style="color: var(--orange-primary)"
+          >Panneau Admin</a
+        >
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary"
+          >Déconnexion</a
+        >
       </nav>
     </header>
 
@@ -80,17 +98,28 @@
 
         <!-- Onglets de gestion Admin -->
         <div class="admin-tabs">
-          <button class="tab-btn active" data-tab="tab-validation">Validation Prestataires</button>
-          <button class="tab-btn" data-tab="tab-utilisateurs">Utilisateurs</button>
-          <button class="tab-btn" data-tab="tab-categories">Gérer Catégories</button>
-          <button class="tab-btn" data-tab="tab-publications">Publications & Modération</button>
+          <button class="tab-btn active" data-tab="tab-validation">
+            Validation Prestataires
+          </button>
+          <button class="tab-btn" data-tab="tab-utilisateurs">
+            Utilisateurs
+          </button>
+          <button class="tab-btn" data-tab="tab-categories">
+            Gérer Catégories
+          </button>
+          <button class="tab-btn" data-tab="tab-publications">
+            Publications & Modération
+          </button>
           <button class="tab-btn" data-tab="tab-apparence">Apparence</button>
         </div>
 
         <!-- Contenu Onglet 1: Validation Prestataires -->
         <div id="tab-validation" class="tab-content active">
           <h3>Prestataires en attente de validation</h3>
-          <p style="margin-bottom: 16px; color: #666;">Vérifiez les compétences et pièces d'identité avant de valider l'accès</p>
+          <p style="margin-bottom: 16px; color: #666">
+            Vérifiez les compétences et pièces d'identité avant de valider
+            l'accès
+          </p>
 
           <div class="table-responsive">
             <table class="admin-table">
@@ -113,8 +142,12 @@
                   <td>2026-08-04</td>
                   <td>
                     <div class="action-buttons">
-                      <button class="btn-success btn-valider-prestataire">Valider</button>
-                      <button class="btn-danger btn-rejeter-prestataire">Rejeter</button>
+                      <button class="btn-success btn-valider-prestataire">
+                        Valider
+                      </button>
+                      <button class="btn-danger btn-rejeter-prestataire">
+                        Rejeter
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -126,8 +159,12 @@
                   <td>2026-08-04</td>
                   <td>
                     <div class="action-buttons">
-                      <button class="btn-success btn-valider-prestataire">Valider</button>
-                      <button class="btn-danger btn-rejeter-prestataire">Rejeter</button>
+                      <button class="btn-success btn-valider-prestataire">
+                        Valider
+                      </button>
+                      <button class="btn-danger btn-rejeter-prestataire">
+                        Rejeter
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -139,8 +176,12 @@
                   <td>2026-08-05</td>
                   <td>
                     <div class="action-buttons">
-                      <button class="btn-success btn-valider-prestataire">Valider</button>
-                      <button class="btn-danger btn-rejeter-prestataire">Rejeter</button>
+                      <button class="btn-success btn-valider-prestataire">
+                        Valider
+                      </button>
+                      <button class="btn-danger btn-rejeter-prestataire">
+                        Rejeter
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -169,21 +210,33 @@
                   <td>Client</td>
                   <td>+225 0700112233</td>
                   <td><span class="status acceptee">Actif</span></td>
-                  <td><button class="btn-danger btn-supprimer-user">Suspendre</button></td>
+                  <td>
+                    <button class="btn-danger btn-supprimer-user">
+                      Suspendre
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Kouassi Abou</td>
                   <td>Prestataire</td>
                   <td>+225 0708091011</td>
                   <td><span class="status acceptee">Validé</span></td>
-                  <td><button class="btn-danger btn-supprimer-user">Suspendre</button></td>
+                  <td>
+                    <button class="btn-danger btn-supprimer-user">
+                      Suspendre
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Awa Koné</td>
                   <td>Client</td>
                   <td>+225 0501020304</td>
                   <td><span class="status acceptee">Actif</span></td>
-                  <td><button class="btn-danger btn-supprimer-user">Suspendre</button></td>
+                  <td>
+                    <button class="btn-danger btn-supprimer-user">
+                      Suspendre
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -193,8 +246,19 @@
         <!-- Contenu Onglet 3: Catégories -->
         <div id="tab-categories" class="tab-content">
           <h3>Gérer les catégories de services</h3>
-          <div style="display: flex; gap: 16px; margin-bottom: 24px; max-width: 500px;">
-            <input type="text" id="newCategoryInput" placeholder="Nom de la nouvelle catégorie (ex: Peintre)" />
+          <div
+            style="
+              display: flex;
+              gap: 16px;
+              margin-bottom: 24px;
+              max-width: 500px;
+            "
+          >
+            <input
+              type="text"
+              id="newCategoryInput"
+              placeholder="Nom de la nouvelle catégorie (ex: Peintre)"
+            />
             <button class="btn-primary" id="btnAddCategory">Ajouter</button>
           </div>
 
@@ -211,22 +275,30 @@
                 <tr>
                   <td>Plombier</td>
                   <td>12</td>
-                  <td><button class="btn-danger btn-delete-cat">Supprimer</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-cat">Supprimer</button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Électricien</td>
                   <td>9</td>
-                  <td><button class="btn-danger btn-delete-cat">Supprimer</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-cat">Supprimer</button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Taxi-moto</td>
                   <td>15</td>
-                  <td><button class="btn-danger btn-delete-cat">Supprimer</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-cat">Supprimer</button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Mécanicien</td>
                   <td>6</td>
-                  <td><button class="btn-danger btn-delete-cat">Supprimer</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-cat">Supprimer</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -251,13 +323,21 @@
                   <td>Kouassi Abou</td>
                   <td>Installation Sanitaire Villa Cocody</td>
                   <td>2026-08-01</td>
-                  <td><button class="btn-danger btn-delete-pub">Supprimer publication</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-pub">
+                      Supprimer publication
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Coulibaly Jacob</td>
                   <td>Réparation Moteur Toyota</td>
                   <td>2026-08-03</td>
-                  <td><button class="btn-danger btn-delete-pub">Supprimer publication</button></td>
+                  <td>
+                    <button class="btn-danger btn-delete-pub">
+                      Supprimer publication
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -267,17 +347,23 @@
         <!-- Contenu Onglet 5: Apparence -->
         <div id="tab-apparence" class="tab-content">
           <h3>Apparence du site</h3>
-          <p style="margin-bottom: 16px; color: #666;">
-            Modifiez l'image affichée dans la section d'accueil (hero) sans toucher au code.
+          <p style="margin-bottom: 16px; color: #666">
+            Modifiez l'image affichée dans la section d'accueil (hero) sans
+            toucher au code.
           </p>
 
-          <div class="demande-form" style="max-width: 600px;">
+          <div class="demande-form" style="max-width: 600px">
             <label>Image actuelle</label>
             <img
               id="apparenceHeroApercu"
               src="../assets/images/propologob.png"
               alt="Aperçu image hero"
-              style="max-width: 100%; border-radius: var(--radius-medium); margin-bottom: 16px; display: block;"
+              style="
+                max-width: 100%;
+                border-radius: var(--radius-medium);
+                margin-bottom: 16px;
+                display: block;
+              "
             />
 
             <label for="apparenceHeroInput">Nouvelle image</label>
@@ -285,7 +371,12 @@
 
             <div id="apparenceHeroMessage"></div>
 
-            <button class="btn-primary" id="btnSauverHero" type="button" style="margin-top: 16px;">
+            <button
+              class="btn-primary"
+              id="btnSauverHero"
+              type="button"
+              style="margin-top: 16px"
+            >
               Enregistrer cette image
             </button>
           </div>
@@ -297,7 +388,11 @@
       <div class="findepage-container">
         <div class="footer-logo">
           <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
-          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" loading="lazy" />
+          <img
+            src="../assets/logo/logo-color.png"
+            alt="Logo BaraChap"
+            loading="lazy"
+          />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>
       </div>
@@ -311,9 +406,9 @@
       <div class="findepage-container">
         <h3>Contact</h3>
         <p>
-          Tel: +225 07 00 00 00 00<br />
-          Email: contact@barachap.ci<br />
-          <span>Abidjan, Côte d'Ivoire</span>
+          Tel: +225 07 14 10 14 15<br />
+          Email: barachap24@gmail.com<br />
+          <span>Woroba, Côte d'Ivoire</span>
         </p>
       </div>
       <div class="findepage-container">

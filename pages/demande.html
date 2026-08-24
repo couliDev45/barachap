@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaraChap - Trouvez un professionnel facilement</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../assets/logo/favicon-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../assets/logo/favicon-16.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/logo/favicon-180.png"
+    />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -52,14 +66,38 @@
 
           <!-- Barrière de connexion : affichée à la place du formulaire tant
                que l'utilisateur n'est pas connecté (voir demande.js) -->
-          <div id="gateConnexion" class="demande-form" style="display: none; text-align: center;">
+          <div
+            id="gateConnexion"
+            class="demande-form"
+            style="display: none; text-align: center"
+          >
             <h2>Connectez-vous pour envoyer votre demande</h2>
-            <p style="margin-bottom: 24px;">
-              Un compte est nécessaire pour qu'un prestataire puisse vous recontacter et suivre votre demande.
+            <p style="margin-bottom: 24px">
+              Un compte est nécessaire pour qu'un prestataire puisse vous
+              recontacter et suivre votre demande.
             </p>
-            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-              <a href="connexion.html" id="gateLienConnexion" class="btn-primary" style="text-decoration: none;">Se connecter</a>
-              <a href="inscription.html" id="gateLienInscription" class="btn-primary" style="text-decoration: none;">Créer un compte</a>
+            <div
+              style="
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+              "
+            >
+              <a
+                href="connexion.html"
+                id="gateLienConnexion"
+                class="btn-primary"
+                style="text-decoration: none"
+                >Se connecter</a
+              >
+              <a
+                href="inscription.html"
+                id="gateLienInscription"
+                class="btn-primary"
+                style="text-decoration: none"
+                >Créer un compte</a
+              >
             </div>
           </div>
 
@@ -129,51 +167,31 @@
       </section>
     </main>
 
-    <!-- <script>
-      const navToggle = document.querySelector(".nav-toggle");
-      const nav = document.querySelector(".nav");
-
-      navToggle.addEventListener("click", () => {
-        const isOpen = nav.classList.toggle("nav-open");
-        navToggle.setAttribute("aria-expanded", isOpen);
-      });
-
-      // ferme le menu quand on clique sur un lien (mobile)
-      nav.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => {
-          nav.classList.remove("nav-open");
-          navToggle.setAttribute("aria-expanded", "false");
-        });
-      });
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          nav.classList.remove("nav-open");
-
-          navToggle.setAttribute("aria-expanded", "false");
-        }
-      });
-    </script> -->
-
     <footer class="findepage">
       <div class="findepage-container">
         <div class="footer-logo">
-          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" loading="lazy" />
+          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
+          <img
+            src="../assets/logo/logo-color.png"
+            alt="Logo BaraChap"
+            loading="lazy"
+          />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>
       </div>
       <div class="findepage-container">
         <h3>Liens utiles</h3>
         <a href="../index.html#accueil">Accueil</a>
-        <a href="../index.html#services">Services</a>
-        <a href="../index.html#prestataires">Prestataires</a>
-        <a href="../index.html#dvp">Devenir prestataire</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
       </div>
       <div class="findepage-container">
         <h3>Contact</h3>
         <p>
-          Tel: +225<br />
-          email: contact@<br />
-          <span>Seguela</span>
+          Tel: +225 07 14 10 14 15<br />
+          Email: barachap24@gmail.com<br />
+          <span>Woroba, Côte d'Ivoire</span>
         </p>
       </div>
       <div class="findepage-container">
@@ -187,6 +205,7 @@
       <hr />
       <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
     </footer>
+
     <script type="module" src="../js/main.js"></script>
     <div id="notification" class="notification">
       <span id="notification-message"></span>
