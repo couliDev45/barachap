@@ -16,6 +16,7 @@ import realisationsRoutes from "./routes/realisations.routes.js";
 import avisRoutes from "./routes/avis.routes.js";
 import parametresRoutes from "./routes/parametres.routes.js";
 import coursesRoutes from "./routes/courses.routes.js";
+import pushRoutes from "./routes/push.routes.js";
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use("/api/realisations", realisationsRoutes);
 app.use("/api/avis", avisRoutes);
 app.use("/api/parametres", parametresRoutes);
 app.use("/api/courses", coursesRoutes);
+app.use("/api/push", pushRoutes);
 
 // Gestion des routes inexistantes (404)
 app.use((req, res) => {

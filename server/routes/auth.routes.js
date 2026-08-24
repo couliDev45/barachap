@@ -116,12 +116,16 @@ router.post("/login", async (req, res) => {
 
 /**
  * GET /api/auth/me
- * Récupère le profil de l'utilisateur connecté via JWT
+ * Récupère le profil de l'utilisateur connecté via JWT.
+ * Inclut désormais la colonne `disponible` : nécessaire côté frontend
+ * (prestataire.js) pour resynchroniser l'état réel du bouton de
+ * disponibilité taxi-moto au chargement de la page, plutôt que de repartir
+ * d'un état local remis à zéro à chaque rechargement.
  */
 router.get("/me", verifierToken, async (req, res) => {
   try {
     const result = await query(
-      "SELECT id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at FROM users WHERE id = $1",
+      "SELECT id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, disponible, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
 

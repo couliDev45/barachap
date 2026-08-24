@@ -9,12 +9,14 @@
  * - réalisations : publication (POST /api/realisations) et suppression (DELETE /api/realisations/:id)
  * - taxi-moto (si metier === "Taxi-moto") : disponibilité, courses proches,
  *   acceptation "premier arrivé premier servi" (voir courses.routes.js)
- * Dépend de utils.js, api.js (requeteAPI) et cloudinary.js (uploaderImage).
+ * Dépend de utils.js, api.js (requeteAPI), cloudinary.js (uploaderImage) et
+ * push.js (activerNotificationsPush).
  */
 
 import { afficherNotification, lireStockage, ecrireStockage } from "./utils.js";
 import { requeteAPI } from "./api.js";
 import { uploaderImage } from "./cloudinary.js";
+import { activerNotificationsPush } from "./push.js";
 
 function echapperHTML(texte) {
   const div = document.createElement("div");
@@ -426,7 +428,9 @@ if (btnValiderRealisation) {
 // "Taxi-moto". Le modèle est "premier arrivé, premier servi" parmi les
 // chauffeurs disponibles à proximité plutôt qu'un envoi séquentiel à un
 // seul chauffeur avec minuteur — voir l'explication donnée à l'utilisateur :
-// un navigateur ne peut pas garantir une notification fiable écran verrouillé.
+// un navigateur ne peut pas garantir une notification fiable écran verrouillé
+// via le seul sondage (polling), d'où l'ajout des notifications push
+// ci-dessous en complément.
 
 const sectionTaxiMoto = document.querySelector("#sectionTaxiMoto");
 
@@ -444,6 +448,10 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
   const btnTerminerCourse = document.querySelector("#btnTerminerCourse");
   const blocCoursesProches = document.querySelector("#titreCoursesProches");
 
+  // Etat local du bouton — resynchronisé depuis le serveur juste après
+  // (voir synchroniserDisponibilite ci-dessous) au lieu de rester figé à
+  // `false` à chaque rechargement de page, ce qui donnait l'impression
+  // trompeuse que la disponibilité s'était désactivée toute seule.
   let estDisponible = false;
   let intervalPosition = null;
   let intervalCourses = null;
@@ -576,6 +584,19 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
     });
   }
 
+  // Démarre le sondage de position + de courses proches, et tente
+  // l'activation des notifications push. Factorisé car utilisé à la fois
+  // au clic sur le bouton et à la resynchronisation au chargement de page.
+  function demarrerSuiviDisponibilite() {
+    activerNotificationsPush(); // best-effort, jamais bloquant
+    envoyerPosition();
+    intervalPosition = setInterval(envoyerPosition, 30000);
+    if (courseEnCours?.style.display !== "block") {
+      chargerCoursesProches();
+      intervalCourses = setInterval(chargerCoursesProches, 8000);
+    }
+  }
+
   // Au chargement de la page : si une course est déjà en cours (ex. le
   // chauffeur a rechargé la page), on la réaffiche directement plutôt que
   // de perdre le contact du client.
@@ -583,6 +604,23 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
     const reponse = await requeteAPI("/courses");
     const active = reponse?.courses?.find((c) => c.statut === "Acceptée" || c.statut === "En cours");
     if (active) afficherCourseEnCours(active);
+  })();
+
+  // Resynchronise le bouton avec le VRAI statut enregistré côté serveur.
+  // Corrige le bug principal : avant, `estDisponible` repartait toujours à
+  // `false` au rechargement de la PWA (ou après verrouillage de l'écran),
+  // ce qui affichait "Activer ma disponibilité" même quand le chauffeur
+  // était toujours marqué disponible en base — donnant l'impression que la
+  // disponibilité s'était désactivée toute seule.
+  (async function synchroniserDisponibilite() {
+    const reponse = await requeteAPI("/auth/me");
+    estDisponible = !!reponse?.user?.disponible;
+
+    if (estDisponible && btnToggleDisponibilite) {
+      btnToggleDisponibilite.textContent = "Désactiver ma disponibilité";
+      btnToggleDisponibilite.classList.add("btn-delete");
+      demarrerSuiviDisponibilite();
+    }
   })();
 
   if (btnToggleDisponibilite) {
@@ -603,15 +641,8 @@ if (sectionTaxiMoto && utilisateurConnecte?.metier === "Taxi-moto") {
           method: "PUT",
           body: JSON.stringify({ disponible: true }),
         });
-        await envoyerPosition();
 
-        // Position rafraîchie toutes les 30s, liste des courses toutes les 8s,
-        // tant que la disponibilité reste active et la page ouverte.
-        intervalPosition = setInterval(envoyerPosition, 30000);
-        if (courseEnCours?.style.display !== "block") {
-          chargerCoursesProches();
-          intervalCourses = setInterval(chargerCoursesProches, 8000);
-        }
+        demarrerSuiviDisponibilite();
       } else {
         btnToggleDisponibilite.textContent = "Activer ma disponibilité";
         btnToggleDisponibilite.classList.remove("btn-delete");

@@ -6,14 +6,17 @@
  *
  * Pas de minuteur de réattribution séquentielle à un seul chauffeur : voir
  * l'explication donnée à l'utilisateur — un site web ne peut pas garantir
- * qu'un chauffeur reçoive une notification en temps réel écran verrouillé,
- * donc un modèle "premier arrivé, premier servi" parmi les chauffeurs
- * disponibles à proximité est plus fiable en pratique.
+ * qu'un chauffeur reçoive une notification en temps réel écran verrouillé
+ * via le seul sondage (polling), donc un modèle "premier arrivé, premier
+ * servi" parmi les chauffeurs disponibles à proximité est plus fiable en
+ * pratique. Une notification push (voir utils/webpush.js) vient compléter
+ * le sondage pour réveiller les chauffeurs même app fermée / écran verrouillé.
  */
 
 import { Router } from "express";
 import { query } from "../config/db.js";
 import { verifierToken } from "../middleware/auth.js";
+import { notifierChauffeursDisponibles } from "../utils/webpush.js";
 
 const router = Router();
 
@@ -46,6 +49,10 @@ function sqlDistanceKm(latParam, lngParam, colLat, colLng) {
  * autre, donc aucune logique particulière n'est nécessaire ici pour ce cas.
  * depart_audio_url/destination_audio_url permettent au chauffeur d'écouter
  * la note vocale d'origine en plus de la transcription.
+ *
+ * Dès la course créée, une notification push est envoyée à tous les
+ * chauffeurs actuellement disponibles (best-effort, jamais bloquant pour
+ * la réponse envoyée au client).
  */
 router.post("/", async (req, res) => {
   const {
@@ -89,6 +96,14 @@ router.post("/", async (req, res) => {
         destinationTranscription || null,
       ],
     );
+
+    // Notification push : best-effort, ne bloque jamais la réponse client
+    // et n'empêche jamais la création de la course en cas d'échec.
+    notifierChauffeursDisponibles({
+      title: "Nouvelle course disponible 🏍️",
+      body: `${departAdresse.trim()} → ${destinationAdresse.trim()}`,
+      url: "/pages/dashboard-prestataire.html",
+    }).catch((err) => console.error("Erreur push nouvelle course :", err));
 
     res.status(201).json({ message: "Recherche d'un chauffeur en cours...", course: result.rows[0] });
   } catch (err) {

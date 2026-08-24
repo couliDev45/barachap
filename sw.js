@@ -2,7 +2,9 @@
  * sw.js
  * Service worker BaraChap — permet l'installation sur l'écran d'accueil et
  * accélère les visites répétées en mettant en cache les fichiers statiques
- * du site (pages, CSS, JS, images).
+ * du site (pages, CSS, JS, images). Gère aussi la réception et l'affichage
+ * des notifications push (voir js/push.js pour l'abonnement côté client et
+ * server/utils/webpush.js pour l'envoi côté serveur).
  *
  * ⚠️ RÈGLE ABSOLUE : ne jamais mettre en cache /api/* ni aucun domaine
  * externe (Cloudinary, Nominatim, tuiles OpenStreetMap, Google Fonts). Ce
@@ -62,6 +64,52 @@ self.addEventListener("fetch", (event) => {
       // Répond depuis le cache immédiatement si disponible (rapide), tout
       // en rafraîchissant le cache en arrière-plan pour la prochaine visite.
       return reponseEnCache || recuperationReseau;
+    }),
+  );
+});
+
+/**
+ * Réception d'une notification push envoyée par le serveur (voir
+ * POST /api/courses dans courses.routes.js, déclenché à chaque nouvelle
+ * course). Fonctionne même si la PWA est fermée ou le téléphone verrouillé
+ * — c'est tout l'intérêt du Service Worker par rapport au simple sondage.
+ */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "BaraChap", body: event.data ? event.data.text() : "" };
+  }
+
+  const options = {
+    body: data.body || "",
+    icon: "/assets/logo/favicon-192.png",
+    badge: "/assets/logo/favicon-192.png",
+    data: { url: data.url || "/" },
+    vibrate: [200, 100, 200],
+    // Garde la notification visible jusqu'à ce que le chauffeur interagisse
+    // avec elle — une nouvelle course ne doit pas passer inaperçue.
+    requireInteraction: true,
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title || "BaraChap", options));
+});
+
+/**
+ * Clic sur une notification : ramène au premier plan un onglet déjà ouvert
+ * sur la bonne page si possible, sinon en ouvre un nouveau.
+ */
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(url) && "focus" in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
     }),
   );
 });
