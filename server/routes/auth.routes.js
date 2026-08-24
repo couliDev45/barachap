@@ -8,13 +8,16 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { query } from "../config/db.js";
 import { verifierToken } from "../middleware/auth.js";
+import { envoyerMessageTelegram, echapperTelegram } from "../utils/telegram.js";
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "barachap_super_secret_key_2026";
 
 /**
  * POST /api/auth/register
- * Inscription d'un nouvel utilisateur (Client ou Prestataire)
+ * Inscription d'un nouvel utilisateur (Client ou Prestataire).
+ * Envoie une alerte Telegram à l'admin à chaque nouvelle inscription
+ * (best-effort, jamais bloquant pour la réponse envoyée à l'utilisateur).
  */
 router.post("/register", async (req, res) => {
   const { nomComplet, telephone, email, password, role, metier, ville, quartier } = req.body;
@@ -52,6 +55,15 @@ router.post("/register", async (req, res) => {
       JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    // Alerte Telegram : nouvelle inscription. Ne bloque jamais la réponse
+    // au client, et n'empêche jamais l'inscription en cas d'échec d'envoi.
+    const labelRole =
+      userRole === "prestataire" ? `Prestataire (${echapperTelegram(metier || "métier non précisé")})` : "Client";
+
+    envoyerMessageTelegram(
+      `🆕 <b>Nouvelle inscription</b>\n\n👤 ${echapperTelegram(nomComplet)}\n📱 ${echapperTelegram(telephone)}\n🏷️ ${labelRole}\n📍 ${echapperTelegram(ville || "Abidjan")}`,
+    ).catch(() => {});
 
     res.status(201).json({
       message: "Inscription réussie.",
@@ -117,10 +129,9 @@ router.post("/login", async (req, res) => {
 /**
  * GET /api/auth/me
  * Récupère le profil de l'utilisateur connecté via JWT.
- * Inclut désormais la colonne `disponible` : nécessaire côté frontend
- * (prestataire.js) pour resynchroniser l'état réel du bouton de
- * disponibilité taxi-moto au chargement de la page, plutôt que de repartir
- * d'un état local remis à zéro à chaque rechargement.
+ * Inclut la colonne `disponible` : nécessaire côté frontend (prestataire.js)
+ * pour resynchroniser l'état réel du bouton de disponibilité taxi-moto au
+ * chargement de la page.
  */
 router.get("/me", verifierToken, async (req, res) => {
   try {

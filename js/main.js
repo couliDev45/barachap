@@ -8,6 +8,7 @@
  * et d'ajouter `export` devant les fonctions de utils.js qui doivent être partagées.
  */
 
+import "./erreurs-client.js";
 import "./api.js";
 import "./menu.js";
 import "./utils.js";
