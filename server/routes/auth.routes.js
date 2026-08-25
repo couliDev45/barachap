@@ -14,7 +14,7 @@ import { envoyerMessageTelegram, echapperTelegram } from "../utils/telegram.js";
 import { envoyerEmailReinitialisation } from "../utils/email.js";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "barachap_super_secret_key_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://barachap.vercel.app";
 
 /**

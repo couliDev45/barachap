@@ -12,11 +12,19 @@ import logger from "./logger.js";
 
 dotenv.config();
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || "mailto:contact@barachap.ci",
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY,
-);
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+export const pushEstConfigure = Boolean(vapidPublicKey && vapidPrivateKey);
+
+if (pushEstConfigure) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT || "mailto:contact@barachap.ci",
+    vapidPublicKey,
+    vapidPrivateKey,
+  );
+} else {
+  logger.warn("Notifications push désactivées : clés VAPID absentes.");
+}
 
 /**
  * Envoie une notification push à tous les chauffeurs (role = 'prestataire')
@@ -25,6 +33,8 @@ webpush.setVapidDetails(
  * @param {{title: string, body: string, url?: string}} payload
  */
 export async function notifierChauffeursDisponibles(payload) {
+  if (!pushEstConfigure) return;
+
   try {
     const result = await query(
       `SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth

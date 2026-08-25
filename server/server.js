@@ -6,6 +6,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 import authRoutes from "./routes/auth.routes.js";
 import usersRoutes from "./routes/users.routes.js";
@@ -92,16 +94,53 @@ process.on("uncaughtException", async (erreur) => {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const originesAutorisees = (process.env.FRONTEND_URL || "https://barachap.vercel.app")
+  .split(",")
+  .map((origine) => origine.trim())
+  .filter(Boolean);
+
+const limiteurAPI = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Trop de requêtes. Veuillez réessayer plus tard." },
+});
+
+const limiteurAuthentification = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { message: "Trop de tentatives. Veuillez réessayer dans 15 minutes." },
+});
+
+const limiteurErreursClient = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Trop de signalements. Veuillez réessayer plus tard." },
+});
 
 // Configuration des Middlewares
+app.disable("x-powered-by");
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
+  origin(origin, callback) {
+    if (!origin || originesAutorisees.includes(origin)) return callback(null, true);
+    // Sans en-tête CORS, le navigateur bloque l'accès à la réponse tout en
+    // évitant de transformer une origine inconnue en erreur 500 serveur.
+    return callback(null, false);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50kb" }));
+app.use(express.urlencoded({ extended: true, limit: "50kb" }));
+app.use("/api", limiteurAPI);
 
 // Endpoint de santé (Healthcheck)
 app.get("/api/health", (req, res) => {
@@ -113,7 +152,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Enregistrement des routes API
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", limiteurAuthentification, authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/demandes", demandesRoutes);
 app.use("/api/admin", adminRoutes);
@@ -124,7 +163,7 @@ app.use("/api/parametres", parametresRoutes);
 app.use("/api/courses", coursesRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/telegram", telegramRoutes);
-app.use("/api/erreurs-client", clientErrorsRoutes);
+app.use("/api/erreurs-client", limiteurErreursClient, clientErrorsRoutes);
 
 // Gestion des routes inexistantes (404)
 app.use((req, res) => {

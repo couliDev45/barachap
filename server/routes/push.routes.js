@@ -7,6 +7,7 @@
 import { Router } from "express";
 import { query } from "../config/db.js";
 import { verifierToken } from "../middleware/auth.js";
+import { pushEstConfigure } from "../utils/webpush.js";
 
 const router = Router();
 
@@ -16,6 +17,9 @@ const router = Router();
  * push (PushManager.subscribe). Publique, pas de JWT requis.
  */
 router.get("/vapid-public-key", (req, res) => {
+  if (!pushEstConfigure) {
+    return res.status(503).json({ message: "Les notifications push ne sont pas configurées." });
+  }
   res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
 });
 
@@ -29,6 +33,10 @@ router.use(verifierToken);
  * lieu de créer un doublon.
  */
 router.post("/subscribe", async (req, res) => {
+  if (!pushEstConfigure) {
+    return res.status(503).json({ message: "Les notifications push ne sont pas configurées." });
+  }
+
   const { subscription } = req.body;
   const userId = req.user.id;
 

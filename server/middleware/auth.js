@@ -5,6 +5,7 @@
 
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ export function verifierToken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
     req.user = decoded;
     next();
   } catch (err) {
