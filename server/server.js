@@ -94,6 +94,12 @@ process.on("uncaughtException", async (erreur) => {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Render place l'application derrière un proxy inverse qui fournit
+// X-Forwarded-For. Une seule couche est approuvée : le rate limiter peut
+// alors retrouver l'IP réelle sans accepter une chaîne de proxies arbitraire.
+app.set("trust proxy", 1);
+
 const originesAutorisees = (process.env.FRONTEND_URL || "https://barachap.vercel.app")
   .split(",")
   .map((origine) => origine.trim())
