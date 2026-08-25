@@ -40,33 +40,42 @@ if (lienConnexion) {
       window.location.href = "connexion.html";
     });
 
-    // "Mon espace" toujours accessible depuis n'importe quelle page une fois
-    // connecté (avant, le tableau de bord n'était visible qu'une fois, juste
-    // après la connexion — impossible d'y revenir en naviguant ailleurs).
     // Le préfixe (ex: "pages/" depuis l'accueil, "" depuis une page interne)
     // est déduit du lien Connexion existant, pour rester correct partout.
     const prefixe = lienConnexion.getAttribute("href").replace("connexion.html", "");
+    const nomPageActuelle = window.location.pathname.split("/").pop();
+
+    function ajouterLienNav(texte, cible) {
+      const dejaPresent = nav && (nav.querySelector(`a[href$="${cible}"]`) || nomPageActuelle === cible);
+      if (!nav || dejaPresent) return;
+
+      const lien = document.createElement("a");
+      lien.href = prefixe + cible;
+      lien.textContent = texte;
+      if (navToggle) {
+        lien.addEventListener("click", () => {
+          nav.classList.remove("nav-open");
+          navToggle.setAttribute("aria-expanded", "false");
+        });
+      }
+      nav.insertBefore(lien, lienConnexion);
+    }
+
+    // "Mon espace" toujours accessible depuis n'importe quelle page une fois
+    // connecté (avant, le tableau de bord n'était visible qu'une fois, juste
+    // après la connexion — impossible d'y revenir en naviguant ailleurs).
     const cibles = {
       admin: "dashboard-admin.html",
       prestataire: "dashboard-prestataire.html",
       client: "dashboard-client.html",
     };
-    const cible = cibles[utilisateurConnecte.role] || cibles.client;
-    const nomPageActuelle = window.location.pathname.split("/").pop();
+    ajouterLienNav("Mon espace", cibles[utilisateurConnecte.role] || cibles.client);
 
-    const dejaPresent = nav && (nav.querySelector(`a[href$="${cible}"]`) || nomPageActuelle === cible);
-
-    if (nav && !dejaPresent) {
-      const lienEspace = document.createElement("a");
-      lienEspace.href = prefixe + cible;
-      lienEspace.textContent = "Mon espace";
-      if (navToggle) {
-        lienEspace.addEventListener("click", () => {
-          nav.classList.remove("nav-open");
-          navToggle.setAttribute("aria-expanded", "false");
-        });
-      }
-      nav.insertBefore(lienEspace, lienConnexion);
+    // "Mon compte" : accès direct à la gestion du compte (email, photo, mot
+    // de passe) depuis n'importe quelle page, sans repasser par le dashboard.
+    // Absent pour un admin, qui n'a pas de profil public/photo à gérer.
+    if (utilisateurConnecte.role !== "admin") {
+      ajouterLienNav("Mon compte", "mon-compte.html");
     }
   } else {
     lienConnexion.textContent = "Connexion";

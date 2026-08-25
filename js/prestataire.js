@@ -222,7 +222,6 @@ document.addEventListener("click", async (e) => {
 // Un seul formulaire ouvert à la fois pour ne pas surcharger la page.
 
 const sections = {
-  profil: document.querySelector("#editProfilSection"),
   service: document.querySelector("#formAddService"),
   realisation: document.querySelector("#formAddRealisation"),
 };
@@ -239,93 +238,9 @@ function basculerSection(cle) {
   if (!estOuvert) cible.style.display = "block";
 }
 
-// --- Édition du profil ---
-
-const btnToggleProfil = document.querySelector("#btnToggleProfil");
-const profilPhotoInput = document.querySelector("#profilPhotoInput");
-const profilPhotoApercu = document.querySelector("#profilPhotoApercu");
-const profilPhotoStatut = document.querySelector("#profilPhotoStatut");
-const profilBioInput = document.querySelector("#profilBioInput");
-const profilVilleInput = document.querySelector("#profilVilleInput");
-const profilQuartierInput = document.querySelector("#profilQuartierInput");
-const profilEmailInput = document.querySelector("#profilEmailInput");
-const profilEditMessage = document.querySelector("#profilEditMessage");
-const btnSauverProfil = document.querySelector("#btnSauverProfil");
-
-let photoSelectionnee = null;
-
-if (btnToggleProfil) {
-  btnToggleProfil.addEventListener("click", async () => {
-    basculerSection("profil");
-
-    // Pré-remplit avec les données actuelles à l'ouverture
-    if (sections.profil?.style.display === "block") {
-      const reponse = await requeteAPI("/auth/me");
-      const user = reponse?.user;
-      if (user) {
-        if (profilBioInput) profilBioInput.value = user.bio || "";
-        if (profilVilleInput) profilVilleInput.value = user.ville || "";
-        if (profilQuartierInput) profilQuartierInput.value = user.quartier || "";
-        if (profilEmailInput) profilEmailInput.value = user.email || "";
-        if (profilPhotoApercu && user.photo_url) profilPhotoApercu.src = user.photo_url;
-      }
-    }
-  });
-}
-
-if (profilPhotoInput) {
-  profilPhotoInput.addEventListener("change", () => {
-    photoSelectionnee = profilPhotoInput.files[0] || null;
-    if (photoSelectionnee && profilPhotoApercu) {
-      profilPhotoApercu.src = URL.createObjectURL(photoSelectionnee);
-    }
-  });
-}
-
-if (btnSauverProfil) {
-  btnSauverProfil.addEventListener("click", async () => {
-    btnSauverProfil.disabled = true;
-
-    let photoUrl = null;
-    if (photoSelectionnee) {
-      if (profilPhotoStatut) profilPhotoStatut.textContent = "Envoi de la photo...";
-      photoUrl = await uploaderImage(photoSelectionnee);
-      if (profilPhotoStatut) {
-        profilPhotoStatut.textContent = photoUrl
-          ? ""
-          : "Photo non envoyée (Cloudinary non configuré) — le reste du profil sera quand même enregistré.";
-      }
-    }
-
-    const reponse = await requeteAPI("/users/me", {
-      method: "PUT",
-      body: JSON.stringify({
-        bio: profilBioInput?.value.trim() || "",
-        photoUrl,
-        ville: profilVilleInput?.value.trim() || null,
-        quartier: profilQuartierInput?.value.trim() || null,
-        email: profilEmailInput?.value.trim() || null,
-      }),
-    });
-
-    btnSauverProfil.disabled = false;
-
-    if (!reponse?.user) {
-      // Le backend renvoie un message précis si l'email est déjà utilisé par
-      // un autre compte — on l'affiche tel quel plutôt qu'un message générique.
-      if (profilEditMessage) profilEditMessage.textContent = reponse?.message || "Erreur lors de l'enregistrement.";
-      afficherNotification(reponse?.message || "Impossible d'enregistrer le profil pour le moment.", "error");
-      return;
-    }
-
-    // Met à jour l'utilisateur stocké localement (greeting, etc.)
-    ecrireStockage("utilisateurConnecte", reponse.user);
-    photoSelectionnee = null;
-
-    afficherNotification("Profil mis à jour avec succès.", "success");
-    basculerSection("profil");
-  });
-}
+// L'édition du profil (bio, photo, ville/quartier, email, mot de passe) est
+// désormais centralisée sur pages/mon-compte.html (voir js/mon-compte.js) —
+// le bouton "Gérer mon compte" du dashboard y renvoie directement.
 
 // --- Ajout de service ---
 

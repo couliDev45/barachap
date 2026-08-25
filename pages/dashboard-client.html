@@ -66,21 +66,11 @@
           </div>
         </div>
 
-        <!-- Email de secours — permet de récupérer le compte en cas de mot
-             de passe oublié (l'inscription se fait uniquement par téléphone,
-             sans email). Repliable pour ne pas surcharger le tableau de
-             bord ; ouvert/fermé via btnToggleEmailSecours (voir dashboard.js). -->
+        <!-- Accès à la gestion complète du compte (email, photo, mot de
+             passe...) — centralisé sur une page dédiée plutôt que dispersé
+             ici, voir pages/mon-compte.html -->
         <div style="max-width: 700px; margin: 0 auto 30px; text-align: center;">
-          <button class="btn-secondary" id="btnToggleEmailSecours" type="button">✉️ Ajouter un email de secours</button>
-          <div id="formEmailSecours" class="demande-form" style="display: none; margin-top: 16px; text-align: left;">
-            <label for="emailSecoursInput">Email de secours</label>
-            <input type="email" id="emailSecoursInput" placeholder="Ex: exemple@email.com" />
-            <p style="font-size: 13px; color: #999; margin-top: 4px;">
-              Utilisé uniquement pour récupérer votre compte en cas de mot de passe oublié.
-            </p>
-            <div id="emailSecoursMessage"></div>
-            <button class="btn-primary" id="btnSauverEmailSecours" type="button" style="margin-top: 16px;">Enregistrer</button>
-          </div>
+          <a href="mon-compte.html" class="btn-secondary" style="text-decoration: none; display: inline-block;">⚙️ Gérer mon compte</a>
         </div>
 
         <div class="dashboard-stats">

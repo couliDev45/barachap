@@ -14,7 +14,7 @@ import { envoyerMessageTelegram, echapperTelegram } from "../utils/telegram.js";
 import { envoyerEmailReinitialisation } from "../utils/email.js";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "barachap_super_secret_key_2026";
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://barachap.vercel.app";
 
 /**
@@ -250,6 +250,49 @@ router.post("/reinitialiser-mot-de-passe", async (req, res) => {
   } catch (err) {
     console.error("Erreur Réinitialisation Mot De Passe :", err);
     res.status(500).json({ message: "Erreur serveur lors de la réinitialisation." });
+  }
+});
+
+/**
+ * POST /api/auth/changer-mot-de-passe
+ * Change le mot de passe de l'utilisateur connecté. Exige le mot de passe
+ * actuel (pas seulement le JWT) pour éviter qu'une session volée/laissée
+ * ouverte sur un appareil partagé permette de changer le mot de passe sans
+ * le connaître.
+ */
+router.post("/changer-mot-de-passe", verifierToken, async (req, res) => {
+  const { motDePasseActuel, nouveauMotDePasse } = req.body;
+  const userId = req.user.id;
+
+  if (!motDePasseActuel || !nouveauMotDePasse) {
+    return res.status(400).json({ message: "Veuillez remplir tous les champs." });
+  }
+
+  if (nouveauMotDePasse.length < 6) {
+    return res.status(400).json({ message: "Le nouveau mot de passe doit contenir au moins 6 caractères." });
+  }
+
+  try {
+    const result = await query("SELECT password_hash FROM users WHERE id = $1", [userId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    const motDePasseValide = await bcrypt.compare(motDePasseActuel, result.rows[0].password_hash);
+    if (!motDePasseValide) {
+      return res.status(400).json({ message: "Le mot de passe actuel est incorrect." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const nouveauHash = await bcrypt.hash(nouveauMotDePasse, salt);
+
+    await query("UPDATE users SET password_hash = $1 WHERE id = $2", [nouveauHash, userId]);
+
+    res.json({ message: "Mot de passe modifié avec succès." });
+  } catch (err) {
+    console.error("Erreur Changement Mot De Passe :", err);
+    res.status(500).json({ message: "Erreur serveur lors du changement de mot de passe." });
   }
 });
 

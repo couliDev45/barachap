@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon compte - BaraChap</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#FF8C42" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BaraChap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+    <style>
+      /* Styles propres à cette page — regroupés ici plutôt que dans les
+         fichiers CSS partagés pour ne pas avoir à modifier style.css /
+         responsive.css sur un projet déjà en place. */
+
+      .compte-section {
+        padding: 60px var(--spacing-large);
+        background: var(--gray-light);
+        min-height: calc(100vh - 200px);
+      }
+
+      .compte-container {
+        max-width: 700px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .compte-card {
+        background: var(--white);
+        border-radius: var(--radius-medium);
+        box-shadow: var(--shadow-card);
+        padding: 32px;
+      }
+
+      .compte-card h3 {
+        font-family: var(--font-title);
+        color: var(--blue-dark);
+        margin-bottom: 20px;
+      }
+
+      /* --- Avatar avec overlay "changer la photo" --- */
+      .avatar-uploader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .avatar-cercle {
+        position: relative;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        cursor: pointer;
+        overflow: hidden;
+        border: 3px solid var(--gray-light);
+        box-shadow: var(--shadow-card);
+        transition: transform 0.2s ease;
+      }
+
+      .avatar-cercle:hover {
+        transform: scale(1.03);
+      }
+
+      .avatar-cercle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(44, 62, 80, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        color: white;
+        font-size: 24px;
+      }
+
+      .avatar-cercle:hover .avatar-overlay {
+        opacity: 1;
+      }
+
+      .avatar-nom {
+        font-family: var(--font-title);
+        font-weight: 700;
+        color: var(--blue-dark);
+        text-align: center;
+      }
+
+      .avatar-role-badge {
+        display: inline-block;
+        background: var(--orange-primary);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-top: 4px;
+      }
+
+      /* --- Champ verrouillé (téléphone, non modifiable ici) --- */
+      .champ-verrouille {
+        background: var(--gray-light) !important;
+        color: #888;
+        cursor: not-allowed;
+      }
+
+      .champ-note {
+        font-size: 12px;
+        color: #999;
+        margin-top: 4px;
+      }
+
+      /* --- Champ mot de passe avec bouton afficher/masquer --- */
+      .champ-mdp-wrapper {
+        position: relative;
+      }
+
+      .champ-mdp-wrapper input {
+        padding-right: 46px !important;
+      }
+
+      .btn-toggle-mdp {
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 8px;
+        line-height: 1;
+      }
+
+      /* --- Indicateur de force du mot de passe --- */
+      .force-mdp-barre {
+        height: 6px;
+        border-radius: 4px;
+        background: #e5e5e5;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .force-mdp-remplissage {
+        height: 100%;
+        width: 0%;
+        border-radius: 4px;
+        transition: width 0.25s ease, background-color 0.25s ease;
+      }
+
+      .force-mdp-label {
+        font-size: 12px;
+        margin-top: 4px;
+        font-weight: 700;
+      }
+
+      .compte-actions-bas {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+      }
+
+      .lien-retour-dashboard {
+        display: inline-block;
+        margin-bottom: 4px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <a href="../index.html" style="text-decoration: none;">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
+        </a>
+      </div>
+      <button
+        class="nav-toggle"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav">
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="compte-section">
+        <div class="compte-container">
+          <a href="#" id="lienRetourDashboard" class="btn-primary retour-btn lien-retour-dashboard">← Retour au tableau de bord</a>
+
+          <!-- Carte identité + photo -->
+          <div class="compte-card">
+            <div class="avatar-uploader">
+              <div class="avatar-cercle" id="avatarCercle" title="Cliquez pour changer votre photo">
+                <img id="avatarApercu" src="../assets/logo/favicon-192.png" alt="Photo de profil" />
+                <div class="avatar-overlay">📷</div>
+              </div>
+              <input type="file" id="avatarInput" accept="image/*" style="display: none;" />
+              <p id="avatarStatut" style="font-size: 13px; color: #999;"></p>
+              <p class="avatar-nom" id="compteNomComplet">—</p>
+              <span class="avatar-role-badge" id="compteRoleBadge">—</span>
+            </div>
+          </div>
+
+          <!-- Informations du profil -->
+          <div class="compte-card">
+            <h3>Informations du profil</h3>
+
+            <label for="compteTelephoneInput">Numéro de téléphone</label>
+            <input type="text" id="compteTelephoneInput" class="champ-verrouille" disabled />
+            <p class="champ-note">Le téléphone sert d'identifiant de connexion et ne peut pas être modifié ici.</p>
+
+            <label for="compteEmailInput" style="margin-top: 20px;">Email de secours</label>
+            <input type="email" id="compteEmailInput" placeholder="Ex: exemple@email.com" />
+            <p class="champ-note">Utilisé uniquement pour récupérer votre compte en cas de mot de passe oublié.</p>
+
+            <div id="blocChampsPrestataire" style="display: none;">
+              <label for="compteMetierInput" style="margin-top: 20px;">Métier</label>
+              <input type="text" id="compteMetierInput" class="champ-verrouille" disabled />
+              <p class="champ-note">Contactez l'administration pour modifier votre métier.</p>
+
+              <label for="compteBioInput" style="margin-top: 20px;">À propos (visible sur votre profil public)</label>
+              <textarea id="compteBioInput" rows="4" placeholder="Présentez votre activité, votre expérience..."></textarea>
+            </div>
+
+            <label for="compteVilleInput" style="margin-top: 20px;">Ville</label>
+            <input type="text" id="compteVilleInput" placeholder="Ex: Abidjan" />
+
+            <label for="compteQuartierInput" style="margin-top: 20px;">Quartier (facultatif)</label>
+            <input type="text" id="compteQuartierInput" placeholder="Ex: Cocody" />
+
+            <div id="compteProfilMessage"></div>
+
+            <div class="compte-actions-bas">
+              <button class="btn-primary" id="btnSauverCompteProfil" type="button">Enregistrer les modifications</button>
+            </div>
+          </div>
+
+          <!-- Changement de mot de passe -->
+          <div class="compte-card">
+            <h3>Changer mon mot de passe</h3>
+
+            <label for="mdpActuelInput">Mot de passe actuel</label>
+            <div class="champ-mdp-wrapper">
+              <input type="password" id="mdpActuelInput" placeholder="Votre mot de passe actuel" />
+              <button type="button" class="btn-toggle-mdp" data-cible="mdpActuelInput">👁</button>
+            </div>
+
+            <label for="mdpNouveauInput" style="margin-top: 20px;">Nouveau mot de passe</label>
+            <div class="champ-mdp-wrapper">
+              <input type="password" id="mdpNouveauInput" placeholder="Au moins 6 caractères" />
+              <button type="button" class="btn-toggle-mdp" data-cible="mdpNouveauInput">👁</button>
+            </div>
+            <div class="force-mdp-barre">
+              <div class="force-mdp-remplissage" id="forceMdpRemplissage"></div>
+            </div>
+            <p class="force-mdp-label" id="forceMdpLabel"></p>
+
+            <label for="mdpConfirmerInput" style="margin-top: 20px;">Confirmer le nouveau mot de passe</label>
+            <div class="champ-mdp-wrapper">
+              <input type="password" id="mdpConfirmerInput" placeholder="Répétez le nouveau mot de passe" />
+              <button type="button" class="btn-toggle-mdp" data-cible="mdpConfirmerInput">👁</button>
+            </div>
+
+            <div id="compteMdpMessage"></div>
+
+            <div class="compte-actions-bas">
+              <button class="btn-primary" id="btnChangerMdp" type="button">Changer le mot de passe</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="findepage">
+      <div class="findepage-container">
+        <div class="footer-logo">
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" loading="lazy" />
+        </div>
+        <p>Trouvez facilement des professionnels près de chez vous</p>
+      </div>
+      <div class="findepage-container">
+        <h3>Liens utiles</h3>
+        <a href="../index.html#accueil">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="prestataires.html">Prestataires</a>
+        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
+      </div>
+      <div class="findepage-container">
+        <h3>Contact</h3>
+        <p>
+          Tel: +225 07 00 00 00 00<br />
+          Email: contact@barachap.ci<br />
+          <span>Abidjan, Côte d'Ivoire</span>
+        </p>
+      </div>
+      <div class="findepage-container">
+        <h3>Réseaux sociaux</h3>
+        <p>
+          Facebook<br />
+          Instagram<br />
+          LinkedIn
+        </p>
+      </div>
+      <hr />
+      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
+    </footer>
+
+    <script type="module" src="../js/main.js"></script>
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+  </body>
+</html>
