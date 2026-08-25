@@ -128,25 +128,38 @@ router.get("/prestataires/:id", async (req, res) => {
 
 /**
  * PUT /api/users/me
- * Met à jour le profil de l'utilisateur connecté (bio, photo, ville, quartier).
- * Seuls les champs fournis sont modifiés — envoyer un champ vide ("") l'efface
- * explicitement, ne pas l'envoyer du tout laisse la valeur actuelle inchangée.
+ * Met à jour le profil de l'utilisateur connecté (bio, photo, ville,
+ * quartier, email). Seuls les champs fournis sont modifiés — envoyer un
+ * champ vide ("") l'efface explicitement, ne pas l'envoyer du tout laisse
+ * la valeur actuelle inchangée.
+ *
+ * Le champ email est notamment utilisé pour la réinitialisation de mot de
+ * passe (voir POST /api/auth/mot-de-passe-oublie) — un utilisateur inscrit
+ * uniquement avec son téléphone doit pouvoir l'ajouter ici après coup.
  */
 router.put("/me", verifierToken, async (req, res) => {
-  const { bio, photoUrl, ville, quartier } = req.body;
+  const { bio, photoUrl, ville, quartier, email } = req.body;
   const userId = req.user.id;
 
   try {
+    if (email) {
+      const dejaUtilise = await query("SELECT id FROM users WHERE email = $1 AND id != $2", [email, userId]);
+      if (dejaUtilise.rows.length > 0) {
+        return res.status(400).json({ message: "Cet email est déjà utilisé par un autre compte." });
+      }
+    }
+
     const result = await query(
       `UPDATE users SET
         bio = COALESCE($1, bio),
         photo_url = COALESCE($2, photo_url),
         ville = COALESCE($3, ville),
         quartier = COALESCE($4, quartier),
+        email = COALESCE($5, email),
         updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5
+       WHERE id = $6
        RETURNING id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at`,
-      [bio ?? null, photoUrl ?? null, ville ?? null, quartier ?? null, userId]
+      [bio ?? null, photoUrl ?? null, ville ?? null, quartier ?? null, email || null, userId]
     );
 
     if (result.rows.length === 0) {

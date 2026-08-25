@@ -6,13 +6,16 @@
  * - affichage de la liste des demandes (GET /api/demandes)
  * - suppression d'une demande (DELETE /api/demandes/:id)
  * - passage en mode modification (redirection vers demande.html)
+ * - email de secours (PUT /api/users/me), pour permettre la récupération du
+ *   compte en cas de mot de passe oublié (l'inscription se fait uniquement
+ *   par téléphone, sans email)
  * Dépend de utils.js (lireStockage, ecrireStockage) et api.js (requeteAPI).
  *
  * Note : le serveur filtre automatiquement les demandes du client connecté
  * à partir du token JWT — pas besoin d'envoyer son id en paramètre.
  */
 
-import { lireStockage, ecrireStockage } from "./utils.js";
+import { lireStockage, ecrireStockage, afficherNotification } from "./utils.js";
 import { requeteAPI } from "./api.js";
 
 const listeDemandes = document.querySelector("#listeDemandes");
@@ -215,6 +218,64 @@ if (btnValiderAvis) {
     demandeIdPourAvis = null;
 
     actualiserDashboard();
+  });
+}
+
+// --- Email de secours ---
+// Permet à un client (inscrit uniquement avec son téléphone) d'ajouter un
+// email, seul canal disponible pour "mot de passe oublié" (voir
+// mot-de-passe-oublie.js et POST /api/auth/mot-de-passe-oublie).
+
+const btnToggleEmailSecours = document.querySelector("#btnToggleEmailSecours");
+const formEmailSecours = document.querySelector("#formEmailSecours");
+const emailSecoursInput = document.querySelector("#emailSecoursInput");
+const emailSecoursMessage = document.querySelector("#emailSecoursMessage");
+const btnSauverEmailSecours = document.querySelector("#btnSauverEmailSecours");
+
+if (btnToggleEmailSecours && formEmailSecours) {
+  btnToggleEmailSecours.addEventListener("click", async () => {
+    const estOuvert = formEmailSecours.style.display === "block";
+    formEmailSecours.style.display = estOuvert ? "none" : "block";
+
+    // Pré-remplit avec l'email actuel (le cas échéant) à l'ouverture
+    if (!estOuvert) {
+      const reponse = await requeteAPI("/auth/me");
+      if (emailSecoursInput && reponse?.user?.email) {
+        emailSecoursInput.value = reponse.user.email;
+      }
+    }
+  });
+}
+
+if (btnSauverEmailSecours) {
+  btnSauverEmailSecours.addEventListener("click", async () => {
+    const email = emailSecoursInput?.value.trim();
+    if (!email) {
+      if (emailSecoursMessage) emailSecoursMessage.textContent = "Veuillez saisir un email.";
+      return;
+    }
+
+    btnSauverEmailSecours.disabled = true;
+
+    const reponse = await requeteAPI("/users/me", {
+      method: "PUT",
+      body: JSON.stringify({ email }),
+    });
+
+    btnSauverEmailSecours.disabled = false;
+
+    if (!reponse?.user) {
+      if (emailSecoursMessage) {
+        emailSecoursMessage.textContent = reponse?.message || "Erreur lors de l'enregistrement.";
+      }
+      return;
+    }
+
+    ecrireStockage("utilisateurConnecte", reponse.user);
+    if (emailSecoursMessage) emailSecoursMessage.textContent = "";
+
+    afficherNotification("Email de secours enregistré avec succès.", "success");
+    formEmailSecours.style.display = "none";
   });
 }
 

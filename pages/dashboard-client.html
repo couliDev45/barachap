@@ -5,23 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaraChap - Trouvez un professionnel facilement</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="../assets/logo/favicon-32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="../assets/logo/favicon-16.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="../assets/logo/favicon-180.png"
-    />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -57,13 +43,9 @@
         <a href="../index.html#accueil">Accueil</a>
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
-        <a href="dashboard-client.html" style="color: var(--orange-primary)"
-          >Mon Espace</a
-        >
+        <a href="dashboard-client.html" style="color: var(--orange-primary);">Mon Espace</a>
         <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
-        <a href="connexion.html" id="btnDeconnexion" class="btn-primary"
-          >Déconnexion</a
-        >
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
       </nav>
     </header>
 
@@ -83,6 +65,24 @@
             <div class="progress-fill"></div>
           </div>
         </div>
+
+        <!-- Email de secours — permet de récupérer le compte en cas de mot
+             de passe oublié (l'inscription se fait uniquement par téléphone,
+             sans email). Repliable pour ne pas surcharger le tableau de
+             bord ; ouvert/fermé via btnToggleEmailSecours (voir dashboard.js). -->
+        <div style="max-width: 700px; margin: 0 auto 30px; text-align: center;">
+          <button class="btn-secondary" id="btnToggleEmailSecours" type="button">✉️ Ajouter un email de secours</button>
+          <div id="formEmailSecours" class="demande-form" style="display: none; margin-top: 16px; text-align: left;">
+            <label for="emailSecoursInput">Email de secours</label>
+            <input type="email" id="emailSecoursInput" placeholder="Ex: exemple@email.com" />
+            <p style="font-size: 13px; color: #999; margin-top: 4px;">
+              Utilisé uniquement pour récupérer votre compte en cas de mot de passe oublié.
+            </p>
+            <div id="emailSecoursMessage"></div>
+            <button class="btn-primary" id="btnSauverEmailSecours" type="button" style="margin-top: 16px;">Enregistrer</button>
+          </div>
+        </div>
+
         <div class="dashboard-stats">
           <div class="stat-card stat-total">
             <h3>Total demandes</h3>
@@ -109,12 +109,8 @@
 
         <!-- Formulaire d'avis — masqué par défaut, ouvert depuis le bouton
              "Laisser un avis" d'une carte de demande acceptée (voir dashboard.js) -->
-        <div
-          id="formAvis"
-          class="demande-form"
-          style="display: none; max-width: 700px; margin: 0 auto 30px"
-        >
-          <h3 style="margin-bottom: 20px">Laisser un avis</h3>
+        <div id="formAvis" class="demande-form" style="display: none; max-width: 700px; margin: 0 auto 30px;">
+          <h3 style="margin-bottom: 20px;">Laisser un avis</h3>
           <label for="avisNoteInput">Note</label>
           <select id="avisNoteInput">
             <option value="5">5 - Excellent</option>
@@ -124,15 +120,9 @@
             <option value="1">1 - Très décevant</option>
           </select>
           <label for="avisCommentaireInput">Commentaire (facultatif)</label>
-          <textarea
-            id="avisCommentaireInput"
-            rows="3"
-            placeholder="Votre expérience avec ce prestataire..."
-          ></textarea>
+          <textarea id="avisCommentaireInput" rows="3" placeholder="Votre expérience avec ce prestataire..."></textarea>
           <div id="avisFormMessage"></div>
-          <button class="btn-primary" id="btnValiderAvis" type="button">
-            Envoyer mon avis
-          </button>
+          <button class="btn-primary" id="btnValiderAvis" type="button">Envoyer mon avis</button>
         </div>
 
         <div id="listeDemandes" class="dashboard-container"></div>
@@ -150,28 +140,23 @@
     <footer class="findepage">
       <div class="findepage-container">
         <div class="footer-logo">
-          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
-          <img
-            src="../assets/logo/logo-color.png"
-            alt="Logo BaraChap"
-            loading="lazy"
-          />
+          <img src="../assets/logo/logo-color.png" alt="logo-BaraChap" loading="lazy" />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>
       </div>
       <div class="findepage-container">
         <h3>Liens utiles</h3>
         <a href="../index.html#accueil">Accueil</a>
-        <a href="services.html">Services</a>
-        <a href="prestataires.html">Prestataires</a>
-        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
+        <a href="../index.html#services">Services</a>
+        <a href="../index.html#prestataires">Prestataires</a>
+        <a href="../index.html#dvp">Devenir prestataire</a>
       </div>
       <div class="findepage-container">
         <h3>Contact</h3>
         <p>
-          Tel: +225 07 14 10 14 15<br />
-          Email: barachap24@gmail.com<br />
-          <span>Woroba, Côte d'Ivoire</span>
+          Tel: +225<br />
+          email: contact@<br />
+          <span>Seguela</span>
         </p>
       </div>
       <div class="findepage-container">
@@ -185,7 +170,6 @@
       <hr />
       <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
     </footer>
-
     <script type="module" src="../js/main.js"></script>
     <div id="notification" class="notification">
       <span id="notification-message"></span>

@@ -248,6 +248,7 @@ const profilPhotoStatut = document.querySelector("#profilPhotoStatut");
 const profilBioInput = document.querySelector("#profilBioInput");
 const profilVilleInput = document.querySelector("#profilVilleInput");
 const profilQuartierInput = document.querySelector("#profilQuartierInput");
+const profilEmailInput = document.querySelector("#profilEmailInput");
 const profilEditMessage = document.querySelector("#profilEditMessage");
 const btnSauverProfil = document.querySelector("#btnSauverProfil");
 
@@ -265,6 +266,7 @@ if (btnToggleProfil) {
         if (profilBioInput) profilBioInput.value = user.bio || "";
         if (profilVilleInput) profilVilleInput.value = user.ville || "";
         if (profilQuartierInput) profilQuartierInput.value = user.quartier || "";
+        if (profilEmailInput) profilEmailInput.value = user.email || "";
         if (profilPhotoApercu && user.photo_url) profilPhotoApercu.src = user.photo_url;
       }
     }
@@ -302,14 +304,17 @@ if (btnSauverProfil) {
         photoUrl,
         ville: profilVilleInput?.value.trim() || null,
         quartier: profilQuartierInput?.value.trim() || null,
+        email: profilEmailInput?.value.trim() || null,
       }),
     });
 
     btnSauverProfil.disabled = false;
 
     if (!reponse?.user) {
-      if (profilEditMessage) profilEditMessage.textContent = "Erreur lors de l'enregistrement.";
-      afficherNotification("Impossible d'enregistrer le profil pour le moment.", "error");
+      // Le backend renvoie un message précis si l'email est déjà utilisé par
+      // un autre compte — on l'affiche tel quel plutôt qu'un message générique.
+      if (profilEditMessage) profilEditMessage.textContent = reponse?.message || "Erreur lors de l'enregistrement.";
+      afficherNotification(reponse?.message || "Impossible d'enregistrer le profil pour le moment.", "error");
       return;
     }
 

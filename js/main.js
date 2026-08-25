@@ -18,6 +18,7 @@ import "./profil.js";
 import "./demande.js";
 import "./dashboard.js";
 import "./auth.js";
+import "./mot-de-passe-oublie.js";
 import "./prestataire.js";
 import "./admin.js";
 import "./hero.js";

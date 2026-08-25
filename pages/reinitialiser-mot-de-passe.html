@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connexion - BaraChap</title>
+    <title>Réinitialiser le mot de passe - BaraChap</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
@@ -26,7 +26,6 @@
   <body>
     <header class="header">
       <div class="logo">
-        <!-- COMMENTAIRE IMAGE: Logo principal BaraChap -->
         <a href="../index.html" style="text-decoration: none;">
           <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
         </a>
@@ -44,64 +43,57 @@
         <a href="../index.html#accueil">Accueil</a>
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
-        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
-        <a href="inscription.html" class="btn-primary">Inscription</a>
+        <a href="connexion.html" class="btn-primary">Connexion</a>
       </nav>
     </header>
 
     <main>
       <section class="auth-container">
         <div class="auth-card">
-          <h2>Connexion à BaraChap</h2>
-          <p class="auth-subtitle">
-            Accédez à votre espace pour gérer vos demandes et services
+          <h2>Nouveau mot de passe</h2>
+          <p class="auth-subtitle" id="reinitSousTitre">
+            Choisissez votre nouveau mot de passe ci-dessous.
           </p>
 
-          <form id="connexionForm" class="auth-form">
+          <form id="reinitForm" class="auth-form">
             <div>
-              <label for="identifiant">Numéro de téléphone ou Email</label>
-              <input
-                type="text"
-                id="identifiant"
-                name="identifiant"
-                placeholder="Ex: 0708091011 ou exemple@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label for="motdepasse">Mot de passe</label>
+              <label for="nouveauMotDePasse">Nouveau mot de passe</label>
               <input
                 type="password"
-                id="motdepasse"
-                name="motdepasse"
-                placeholder="Entrez votre mot de passe"
+                id="nouveauMotDePasse"
+                name="nouveauMotDePasse"
+                placeholder="Au moins 6 caractères"
                 required
               />
-              <p style="text-align: right; margin-top: 8px;">
-                <a href="mot-de-passe-oublie.html" style="font-size: 13px; color: var(--orange-primary); text-decoration: none; font-weight: 700;">Mot de passe oublié ?</a>
-              </p>
             </div>
 
             <div>
-              <label for="typeCompte">Se connecter en tant que</label>
-              <select id="typeCompte" name="typeCompte" required>
-                <option value="client" selected>Client (Je cherche un service)</option>
-                <option value="prestataire">Prestataire (Je propose un service)</option>
-              </select>
+              <label for="confirmerNouveauMotDePasse">Confirmer le nouveau mot de passe</label>
+              <input
+                type="password"
+                id="confirmerNouveauMotDePasse"
+                name="confirmerNouveauMotDePasse"
+                placeholder="Répétez le mot de passe"
+                required
+              />
             </div>
 
-            <div id="connexionMessage"></div>
+            <div id="reinitMessage"></div>
 
             <button type="submit" class="btn-primary" style="width: 100%;">
-              Se connecter
+              Réinitialiser mon mot de passe
             </button>
           </form>
 
+          <!-- Affiché à la place du formulaire si le lien est invalide/expiré -->
+          <div id="reinitLienInvalide" style="display: none; text-align: center;">
+            <p style="margin-bottom: 20px;">Ce lien de réinitialisation est invalide ou a expiré.</p>
+            <a href="mot-de-passe-oublie.html" class="btn-primary" style="text-decoration: none;">Demander un nouveau lien</a>
+          </div>
+
           <div class="auth-footer">
             <p>
-              Vous n'avez pas encore de compte ?
-              <a href="inscription.html" id="lienVersInscription">Créer un compte</a>
+              <a href="connexion.html">Retour à la connexion</a>
             </p>
           </div>
         </div>
@@ -111,7 +103,6 @@
     <footer class="findepage">
       <div class="findepage-container">
         <div class="footer-logo">
-          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
           <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" loading="lazy" />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>

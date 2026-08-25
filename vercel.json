@@ -22,6 +22,14 @@
       "dest": "/pages/inscription.html"
     },
     {
+      "src": "/mot-de-passe-oublie",
+      "dest": "/pages/mot-de-passe-oublie.html"
+    },
+    {
+      "src": "/reinitialiser-mot-de-passe",
+      "dest": "/pages/reinitialiser-mot-de-passe.html"
+    },
+    {
       "src": "/prestataires",
       "dest": "/pages/prestataires.html"
     },

@@ -24,6 +24,22 @@ import { signalerErreurServeur } from "./utils/telegram.js";
 dotenv.config();
 
 /**
+ * Node.js affiche ses propres avertissements internes (dépréciations,
+ * warnings expérimentaux...) via console.error par défaut — sans ce
+ * correctif, ils étaient donc pris pour de vraies erreurs applicatives et
+ * envoyaient une fausse alerte 🔴 sur Telegram (ex. l'avertissement SSL de
+ * la librairie pg). On retire l'écouteur "warning" par défaut de Node et on
+ * le remplace par le nôtre, qui utilise console.warn (jamais intercepté) :
+ * l'avertissement reste visible dans les logs Render, mais ne déclenche
+ * plus d'alerte. Les vraies erreurs applicatives, elles, continuent de
+ * passer par console.error normalement, juste en dessous.
+ */
+process.removeAllListeners("warning");
+process.on("warning", (warning) => {
+  console.warn(`⚠️ Avertissement Node.js (${warning.name}) : ${warning.message}`);
+});
+
+/**
  * Alerte Telegram automatique sur les erreurs serveur.
  * On intercepte console.error une seule fois ici, au démarrage : toutes les
  * routes du projet appellent déjà console.error(...) dans leurs blocs
