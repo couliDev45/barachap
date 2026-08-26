@@ -663,70 +663,131 @@ img {
   background: #f9fafb;
   border-radius: 12px;
 }
-/* le tableau de statistique */
+/* ==========================================================================
+   TABLEAU DE STATISTIQUE — cartes compactes façon "chips"
+   Remplace l'ancien format (gros blocs pleine largeur, fond saturé, chiffre
+   géant) par des cartes compactes avec icône colorée + liseré de couleur :
+   moins envahissant visuellement, surtout sur mobile où l'ancien format
+   obligeait à scroller longuement avant d'arriver au contenu utile de la
+   page (liste des demandes, tableau admin...).
+   Cette section reste la SEULE source de vérité pour .dashboard-stats et
+   .stat-card, utilisée par dashboard-client.html, dashboard-admin.html et
+   dashboard-prestataire.html.
+   ========================================================================== */
+
 .dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-  margin: 40px 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 28px 0;
+}
+
+@media (min-width: 640px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .stat-card {
-  padding: 24px;
+  background: var(--white);
   border-radius: var(--radius-medium);
-  text-align: center;
   box-shadow: var(--shadow-card);
-  transition: transform 0.3s ease;
-  color: white;
-}
-
-.stat-card:hover {
-  transform: translateY(-10px) scale(1.02);
-}
-
-.stat-card h3 {
-  margin-bottom: 12px;
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.stat-card p {
-  font-size: 36px;
-  font-weight: bold;
-}
-
-/* Total */
-.stat-total {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-}
-
-/* En attente */
-.stat-attente {
-  background: linear-gradient(135deg, #f39c12, #e67e22);
-}
-
-/* Acceptées */
-.stat-acceptee {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-}
-
-/* Refusées */
-.stat-refusee {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-}
-.stat-card {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--blue-dark);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+/* Liseré de couleur sur le bord gauche, à la place du fond saturé plein bloc */
 .stat-card::before {
   content: "";
   position: absolute;
-  top: 0;
   left: 0;
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.35);
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.stat-total::before {
+  background: #3498db;
+}
+
+.stat-attente::before {
+  background: #f39c12;
+}
+
+.stat-acceptee::before {
+  background: #2ecc71;
+}
+
+.stat-refusee::before {
+  background: #e74c3c;
+}
+
+.stat-card-icone {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: white;
+}
+
+.stat-total .stat-card-icone {
+  background: #3498db;
+}
+
+.stat-attente .stat-card-icone {
+  background: #f39c12;
+}
+
+.stat-acceptee .stat-card-icone {
+  background: #2ecc71;
+}
+
+.stat-refusee .stat-card-icone {
+  background: #e74c3c;
+}
+
+.stat-card-texte {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card h3 {
+  font-family: var(--font-text);
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-card p {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-title);
+  color: var(--blue-dark);
+  line-height: 1.1;
 }
 
 /* ================================================================
