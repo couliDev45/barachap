@@ -4,7 +4,8 @@
  * - affichage des infos réelles (GET /api/auth/me)
  * - changement de photo de profil (Cloudinary + PUT /api/users/me)
  * - édition email / ville / quartier / bio (PUT /api/users/me)
- * - changement de mot de passe (POST /api/auth/changer-mot-de-passe), avec
+ * - changement de mot de passe (POST /api/auth/changer-mot-de-passe), dans
+ *   un accordéon repliable (ligne "Mot de passe" cliquable), avec
  *   indicateur de force et affichage/masquage des champs
  */
 
@@ -31,6 +32,7 @@ function initialiserPageCompte(utilisateurInitial) {
   const avatarApercu = document.querySelector("#avatarApercu");
   const avatarStatut = document.querySelector("#avatarStatut");
   const compteRoleBadge = document.querySelector("#compteRoleBadge");
+  const compteTelephoneAffiche = document.querySelector("#compteTelephoneAffiche");
 
   const compteTelephoneInput = document.querySelector("#compteTelephoneInput");
   const compteEmailInput = document.querySelector("#compteEmailInput");
@@ -57,6 +59,7 @@ function initialiserPageCompte(utilisateurInitial) {
     if (compteRoleBadge) {
       compteRoleBadge.textContent = user.role === "prestataire" ? user.metier || "Prestataire" : "Client";
     }
+    if (compteTelephoneAffiche) compteTelephoneAffiche.textContent = user.telephone || "";
     if (compteTelephoneInput) compteTelephoneInput.value = user.telephone || "";
     if (compteEmailInput) compteEmailInput.value = user.email || "";
     if (compteVilleInput) compteVilleInput.value = user.ville || "";
@@ -87,7 +90,7 @@ function initialiserPageCompte(utilisateurInitial) {
       photoSelectionnee = avatarInput.files[0] || null;
       if (photoSelectionnee && avatarApercu) {
         avatarApercu.src = URL.createObjectURL(photoSelectionnee);
-        if (avatarStatut) avatarStatut.textContent = "Nouvelle photo sélectionnée — cliquez sur Enregistrer pour confirmer.";
+        if (avatarStatut) avatarStatut.textContent = "Nouvelle photo — cliquez sur Enregistrer pour confirmer";
       }
     });
   }
@@ -144,10 +147,23 @@ function initialiserPageCompte(utilisateurInitial) {
     });
   }
 
+  // --- Accordéon "Changer mon mot de passe" ---
+
+  const ligneChangerMdp = document.querySelector("#ligneChangerMdp");
+  const accordeonMdp = document.querySelector("#accordeonMdp");
+
+  if (ligneChangerMdp && accordeonMdp) {
+    ligneChangerMdp.addEventListener("click", () => {
+      const estOuvert = accordeonMdp.classList.toggle("ouvert");
+      ligneChangerMdp.classList.toggle("ouvert", estOuvert);
+    });
+  }
+
   // --- Afficher / masquer les mots de passe ---
 
   document.querySelectorAll(".btn-toggle-mdp").forEach((bouton) => {
-    bouton.addEventListener("click", () => {
+    bouton.addEventListener("click", (e) => {
+      e.stopPropagation(); // ne doit pas refermer l'accordéon parent
       const cible = document.querySelector(`#${bouton.dataset.cible}`);
       if (!cible) return;
       const estMasque = cible.type === "password";
@@ -155,6 +171,10 @@ function initialiserPageCompte(utilisateurInitial) {
       bouton.textContent = estMasque ? "🙈" : "👁";
     });
   });
+
+  // Empêche un clic dans le contenu de l'accordéon de le refermer via le
+  // gestionnaire posé sur la ligne d'en-tête (délégation naturelle sinon).
+  accordeonMdp?.addEventListener("click", (e) => e.stopPropagation());
 
   // --- Indicateur de force du mot de passe ---
 
@@ -200,7 +220,9 @@ function initialiserPageCompte(utilisateurInitial) {
   const compteMdpMessage = document.querySelector("#compteMdpMessage");
 
   if (btnChangerMdp) {
-    btnChangerMdp.addEventListener("click", async () => {
+    btnChangerMdp.addEventListener("click", async (e) => {
+      e.stopPropagation();
+
       const motDePasseActuel = mdpActuelInput?.value;
       const nouveauMotDePasse = mdpNouveauInput?.value;
       const confirmation = mdpConfirmerInput?.value;
@@ -245,6 +267,11 @@ function initialiserPageCompte(utilisateurInitial) {
       if (forceMdpLabel) forceMdpLabel.textContent = "";
 
       afficherNotification("Mot de passe changé avec succès.", "success");
+
+      // Referme l'accordéon après succès — pas de raison de le laisser
+      // ouvert une fois l'action terminée.
+      accordeonMdp?.classList.remove("ouvert");
+      ligneChangerMdp?.classList.remove("ouvert");
     });
   }
 }
