@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mon compte - BaraChap</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../assets/logo/favicon-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../assets/logo/favicon-16.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/logo/favicon-180.png"
+    />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,9 +38,7 @@
     <link rel="stylesheet" href="../css/responsive.css" />
     <style>
       /* ============================================================
-         Page "Mon compte" — liste groupée avec icônes, façon réglages
-         iOS/Telegram. Styles regroupés ici plutôt que dans les fichiers
-         CSS partagés, pour ne pas toucher au reste du site.
+         Page "Mon compte" — liste groupée avec icônes.
          ============================================================ */
 
       .compte-section {
@@ -172,12 +184,24 @@
         color: white;
       }
 
-      .icone-bleu { background: var(--info-color); }
-      .icone-orange { background: var(--orange-primary); }
-      .icone-vert { background: var(--success-color); }
-      .icone-gris { background: #95a5a6; }
-      .icone-marine { background: var(--blue-dark); }
-      .icone-rouge { background: var(--danger-color); }
+      .icone-bleu {
+        background: var(--info-color);
+      }
+      .icone-orange {
+        background: var(--orange-primary);
+      }
+      .icone-vert {
+        background: var(--success-color);
+      }
+      .icone-gris {
+        background: #95a5a6;
+      }
+      .icone-marine {
+        background: var(--blue-dark);
+      }
+      .icone-rouge {
+        background: var(--danger-color);
+      }
 
       .ligne-contenu {
         flex: 1;
@@ -306,7 +330,9 @@
         height: 100%;
         width: 0%;
         border-radius: 4px;
-        transition: width 0.25s ease, background-color 0.25s ease;
+        transition:
+          width 0.25s ease,
+          background-color 0.25s ease;
       }
 
       .force-mdp-label {
@@ -334,7 +360,7 @@
   <body>
     <header class="header">
       <div class="logo">
-        <a href="../index.html" style="text-decoration: none;">
+        <a href="../index.html" style="text-decoration: none">
           <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
         </a>
       </div>
@@ -351,27 +377,47 @@
         <a href="../index.html#accueil">Accueil</a>
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
-        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary"
+          >Déconnexion</a
+        >
       </nav>
     </header>
 
     <main>
       <section class="compte-section">
         <div class="compte-container">
-          <a href="#" id="lienRetourDashboard" class="lien-retour-dashboard">← Retour au tableau de bord</a>
+          <a href="#" id="lienRetourDashboard" class="lien-retour-dashboard"
+            >← Retour au tableau de bord</a
+          >
 
           <!-- En-tête : avatar + nom + rôle -->
           <div class="compte-header">
-            <div class="avatar-cercle" id="avatarCercle" title="Changer ma photo">
-              <img id="avatarApercu" src="../assets/logo/favicon-192.png" alt="Photo de profil" />
+            <div
+              class="avatar-cercle"
+              id="avatarCercle"
+              title="Changer ma photo"
+            >
+              <img
+                id="avatarApercu"
+                src="../assets/logo/favicon-192.png"
+                alt="Photo de profil"
+              />
               <div class="avatar-badge-camera">📷</div>
             </div>
-            <input type="file" id="avatarInput" accept="image/*" style="display: none;" />
+            <input
+              type="file"
+              id="avatarInput"
+              accept="image/*"
+              style="display: none"
+            />
             <p class="avatar-statut" id="avatarStatut"></p>
             <p class="compte-nom" id="compteNomComplet">—</p>
             <div class="compte-souscribe">
               <span class="compte-role-badge" id="compteRoleBadge">—</span>
-              <span class="compte-telephone-affiche" id="compteTelephoneAffiche"></span>
+              <span
+                class="compte-telephone-affiche"
+                id="compteTelephoneAffiche"
+              ></span>
             </div>
           </div>
 
@@ -379,11 +425,13 @@
           <p class="liste-groupee-label">Profil</p>
           <div class="liste-groupee">
             <div class="ligne-reglage">
-              <div class="ligne-icone icone-gris">📱</div>
+              <div class="ligne-icone icone-gris"></div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Numéro de téléphone</span>
                 <input type="text" id="compteTelephoneInput" disabled />
-                <span class="champ-note-ligne">Sert d'identifiant de connexion — non modifiable ici</span>
+                <span class="champ-note-ligne"
+                  >Sert d'identifiant de connexion — non modifiable ici</span
+                >
               </div>
             </div>
 
@@ -391,7 +439,11 @@
               <div class="ligne-icone icone-bleu">✉️</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Email de secours</span>
-                <input type="email" id="compteEmailInput" placeholder="Ex: exemple@email.com" />
+                <input
+                  type="email"
+                  id="compteEmailInput"
+                  placeholder="Ex: exemple@email.com"
+                />
               </div>
             </div>
 
@@ -399,7 +451,11 @@
               <div class="ligne-icone icone-orange">📍</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Ville</span>
-                <input type="text" id="compteVilleInput" placeholder="Ex: Abidjan" />
+                <input
+                  type="text"
+                  id="compteVilleInput"
+                  placeholder="Ex: Seguela"
+                />
               </div>
             </div>
 
@@ -407,33 +463,51 @@
               <div class="ligne-icone icone-vert">🏘️</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Quartier</span>
-                <input type="text" id="compteQuartierInput" placeholder="Ex: Cocody" />
+                <input
+                  type="text"
+                  id="compteQuartierInput"
+                  placeholder="Ex: Manoir"
+                />
               </div>
             </div>
 
-            <div id="blocChampsPrestataire" style="display: none;">
+            <div id="blocChampsPrestataire" style="display: none">
               <div class="ligne-reglage">
                 <div class="ligne-icone icone-gris">🛠️</div>
                 <div class="ligne-contenu">
                   <span class="ligne-label">Métier</span>
                   <input type="text" id="compteMetierInput" disabled />
-                  <span class="champ-note-ligne">Contactez l'administration pour le modifier</span>
+                  <span class="champ-note-ligne"
+                    >Contactez le service clients pour le modifier</span
+                  >
                 </div>
               </div>
 
               <div class="ligne-reglage">
                 <div class="ligne-icone icone-marine">📝</div>
                 <div class="ligne-contenu">
-                  <span class="ligne-label">À propos (visible sur votre profil public)</span>
-                  <textarea id="compteBioInput" rows="3" placeholder="Présentez votre activité, votre expérience..."></textarea>
+                  <span class="ligne-label"
+                    >À propos (visible sur votre profil public)</span
+                  >
+                  <textarea
+                    id="compteBioInput"
+                    rows="3"
+                    placeholder="Présentez votre activité, votre expérience..."
+                  ></textarea>
                 </div>
               </div>
             </div>
 
-            <div id="compteProfilMessage" style="padding: 0 16px;"></div>
+            <div id="compteProfilMessage" style="padding: 0 16px"></div>
 
             <div class="liste-groupee-actions">
-              <button class="btn-primary" id="btnSauverCompteProfil" type="button">Enregistrer les modifications</button>
+              <button
+                class="btn-primary"
+                id="btnSauverCompteProfil"
+                type="button"
+              >
+                Enregistrer les modifications
+              </button>
             </div>
           </div>
 
@@ -444,7 +518,9 @@
               <div class="ligne-icone icone-rouge">🔒</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Mot de passe</span>
-                <span style="font-size: 15px; color: var(--blue-dark);">Changer mon mot de passe</span>
+                <span style="font-size: 15px; color: var(--blue-dark)"
+                  >Changer mon mot de passe</span
+                >
               </div>
               <span class="ligne-chevron">›</span>
             </div>
@@ -453,29 +529,71 @@
               <div class="accordeon-interieur">
                 <div class="champ-mdp-wrapper">
                   <label for="mdpActuelInput">Mot de passe actuel</label>
-                  <input type="password" id="mdpActuelInput" placeholder="Votre mot de passe actuel" />
-                  <button type="button" class="btn-toggle-mdp" data-cible="mdpActuelInput">👁</button>
+                  <input
+                    type="password"
+                    id="mdpActuelInput"
+                    placeholder="Votre mot de passe actuel"
+                  />
+                  <button
+                    type="button"
+                    class="btn-toggle-mdp"
+                    data-cible="mdpActuelInput"
+                  >
+                    👁
+                  </button>
                 </div>
 
                 <div class="champ-mdp-wrapper">
                   <label for="mdpNouveauInput">Nouveau mot de passe</label>
-                  <input type="password" id="mdpNouveauInput" placeholder="Au moins 6 caractères" />
-                  <button type="button" class="btn-toggle-mdp" data-cible="mdpNouveauInput">👁</button>
+                  <input
+                    type="password"
+                    id="mdpNouveauInput"
+                    placeholder="Au moins 8 caractères"
+                    minlength="8"
+                  />
+                  <button
+                    type="button"
+                    class="btn-toggle-mdp"
+                    data-cible="mdpNouveauInput"
+                  >
+                    👁
+                  </button>
                 </div>
                 <div class="force-mdp-barre">
-                  <div class="force-mdp-remplissage" id="forceMdpRemplissage"></div>
+                  <div
+                    class="force-mdp-remplissage"
+                    id="forceMdpRemplissage"
+                  ></div>
                 </div>
                 <p class="force-mdp-label" id="forceMdpLabel"></p>
 
                 <div class="champ-mdp-wrapper">
-                  <label for="mdpConfirmerInput">Confirmer le nouveau mot de passe</label>
-                  <input type="password" id="mdpConfirmerInput" placeholder="Répétez le nouveau mot de passe" />
-                  <button type="button" class="btn-toggle-mdp" data-cible="mdpConfirmerInput">👁</button>
+                  <label for="mdpConfirmerInput"
+                    >Confirmer le nouveau mot de passe</label
+                  >
+                  <input
+                    type="password"
+                    id="mdpConfirmerInput"
+                    placeholder="Répétez le nouveau mot de passe"
+                  />
+                  <button
+                    type="button"
+                    class="btn-toggle-mdp"
+                    data-cible="mdpConfirmerInput"
+                  >
+                    👁
+                  </button>
                 </div>
 
                 <div id="compteMdpMessage" class="accordeon-message"></div>
 
-                <button class="btn-primary accordeon-bouton" id="btnChangerMdp" type="button">Changer le mot de passe</button>
+                <button
+                  class="btn-primary accordeon-bouton"
+                  id="btnChangerMdp"
+                  type="button"
+                >
+                  Changer le mot de passe
+                </button>
               </div>
             </div>
           </div>
@@ -486,7 +604,12 @@
     <footer class="findepage">
       <div class="findepage-container">
         <div class="footer-logo">
-          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" loading="lazy" />
+          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
+          <img
+            src="../assets/logo/logo-color.png"
+            alt="Logo BaraChap"
+            loading="lazy"
+          />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>
       </div>
@@ -500,9 +623,9 @@
       <div class="findepage-container">
         <h3>Contact</h3>
         <p>
-          Tel: +225 07 00 00 00 00<br />
-          Email: contact@barachap.ci<br />
-          <span>Abidjan, Côte d'Ivoire</span>
+          Tel: +225 07 14 10 14 15<br />
+          Email: barachap24@gmail.com<br />
+          <span>Woroba, Côte d'Ivoire</span>
         </p>
       </div>
       <div class="findepage-container">
