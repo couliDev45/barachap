@@ -1126,3 +1126,413 @@ img {
   text-decoration: none;
   margin-bottom: 20px;
 }
+
+/* ================================================================
+   PAGE "MON COMPTE" — liste groupée avec icônes, façon réglages
+   iOS/Telegram (avatar + nom en en-tête, cartes de champs groupés,
+   accordéon pour le changement de mot de passe).
+   ================================================================ */
+
+.compte-section {
+  padding: 40px var(--spacing-medium) 80px;
+  background: var(--gray-light);
+  min-height: calc(100vh - 200px);
+}
+
+.compte-container {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.lien-retour-dashboard {
+  display: inline-block;
+  margin-bottom: 20px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* --- En-tête profil : avatar + nom + badge rôle --- */
+.compte-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px;
+  margin-bottom: 24px;
+}
+
+.avatar-cercle {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  border: 4px solid var(--white);
+  box-shadow: var(--shadow-card);
+  background: var(--white);
+}
+
+.avatar-cercle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Badge caméra toujours visible (pas un overlay au survol — le survol
+   n'existe pas au doigt sur mobile, c'était invisible sans souris). */
+.avatar-badge-camera {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--orange-primary);
+  border: 3px solid var(--gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.avatar-statut {
+  font-size: 12px;
+  color: #999;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 16px;
+}
+
+.compte-nom {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--blue-dark);
+  margin-top: 14px;
+  text-align: center;
+}
+
+.compte-souscribe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.compte-role-badge {
+  background: var(--orange-primary);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+
+.compte-telephone-affiche {
+  font-size: 13px;
+  color: #888;
+}
+
+/* --- Cartes de liste groupée --- */
+.liste-groupee-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 24px 4px 8px;
+}
+
+.liste-groupee {
+  background: var(--white);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.ligne-reglage {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ligne-reglage:last-child {
+  border-bottom: none;
+}
+
+.ligne-icone {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--white);
+}
+
+.icone-bleu { background: var(--info-color); }
+.icone-orange { background: var(--orange-primary); }
+.icone-vert { background: var(--success-color); }
+.icone-gris { background: var(--gray-medium); }
+.icone-marine { background: var(--blue-dark); }
+.icone-rouge { background: var(--danger-color); }
+
+.ligne-contenu {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ligne-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.ligne-reglage input,
+.ligne-reglage textarea {
+  border: none;
+  padding: 0;
+  font-size: 15px;
+  font-family: var(--font-text);
+  color: var(--blue-dark);
+  background: transparent;
+  width: 100%;
+}
+
+.ligne-reglage input:focus,
+.ligne-reglage textarea:focus {
+  outline: none;
+}
+
+.ligne-reglage input:disabled {
+  color: #aaa;
+}
+
+.ligne-reglage textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+
+.liste-groupee-actions {
+  padding: 14px 16px;
+}
+
+.liste-groupee-actions .btn-primary {
+  width: 100%;
+}
+
+/* --- Ligne cliquable "Changer le mot de passe" (accordéon) --- */
+.ligne-cliquable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ligne-chevron {
+  font-size: 20px;
+  color: #ccc;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.ligne-cliquable.ouvert .ligne-chevron {
+  transform: rotate(90deg);
+}
+
+.accordeon-contenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordeon-contenu.ouvert {
+  max-height: 600px;
+}
+
+.accordeon-interieur {
+  padding: 4px 16px 18px;
+}
+
+/* --- Champ mot de passe avec bouton afficher/masquer --- */
+.champ-mdp-wrapper {
+  position: relative;
+  margin-top: 14px;
+}
+
+.champ-mdp-wrapper label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.champ-mdp-wrapper input {
+  width: 100%;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: var(--radius-small);
+  padding: 10px 42px 10px 12px !important;
+  font-size: 15px;
+}
+
+.champ-mdp-wrapper input:focus {
+  border-color: var(--orange-primary) !important;
+  outline: none;
+}
+
+.btn-toggle-mdp {
+  position: absolute;
+  right: 6px;
+  bottom: 7px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  padding: 6px;
+  line-height: 1;
+}
+
+.force-mdp-barre {
+  height: 5px;
+  border-radius: 4px;
+  background: #e5e5e5;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.force-mdp-remplissage {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition:
+    width 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.force-mdp-label {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.accordeon-message {
+  margin-top: 10px;
+}
+
+.accordeon-bouton {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.champ-note-ligne {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 2px;
+}
+
+/* ================================================================
+   CASE À COCHER "CONDITIONS D'UTILISATION" (inscription.html)
+   ================================================================ */
+
+.cgu-checkbox-ligne {
+  margin-top: 4px;
+}
+
+.cgu-checkbox-ligne label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--blue-dark);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.cgu-checkbox-ligne input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin-top: 2px;
+  accent-color: var(--orange-primary);
+  cursor: pointer;
+}
+
+.cgu-checkbox-ligne a {
+  color: var(--orange-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cgu-checkbox-ligne a:hover {
+  text-decoration: underline;
+}
+
+/* ================================================================
+   PAGE CONDITIONS D'UTILISATION & POLITIQUE DE CONFIDENTIALITÉ
+   ================================================================ */
+
+.cgu-section {
+  padding: 60px var(--spacing-large) 80px;
+  background: var(--white);
+}
+
+.cgu-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.cgu-container h1 {
+  font-family: var(--font-title);
+  font-size: clamp(24px, 4vw, 32px);
+  color: var(--blue-dark);
+  margin-bottom: 8px;
+}
+
+.cgu-maj {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.cgu-avertissement {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffe69c;
+  border-radius: var(--radius-small);
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.cgu-container h2 {
+  font-family: var(--font-title);
+  font-size: 19px;
+  color: var(--blue-dark);
+  margin-top: 32px;
+  margin-bottom: 10px;
+}
+
+.cgu-container p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.cgu-container ul {
+  margin: 8px 0 16px 20px;
+}
+
+.cgu-container li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 6px;
+}

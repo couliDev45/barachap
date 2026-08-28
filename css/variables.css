@@ -6,6 +6,7 @@
     /* Couleurs neutres */
     --blue-dark: #2C3E50;
     --gray-light: #F5F5F5;
+    --gray-medium: #95A5A6;
     --white: #FFFFFF;
 
     /* Couleurs sémantiques et de statut */
@@ -30,4 +31,3 @@
     /* Ombres */
     --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-

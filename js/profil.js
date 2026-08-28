@@ -10,6 +10,13 @@
  * bio et photo_url viennent de PUT /api/users/me (voir prestataire.js) — si le
  * prestataire ne les a pas encore renseignés, on retombe sur une phrase
  * générique et l'image d'exemple du gabarit plutôt que de rien afficher.
+ *
+ * Cas particulier "Taxi-moto" : ce métier ne fonctionne pas comme les
+ * autres — un chauffeur ne reçoit jamais de demande ciblée envoyée depuis
+ * son profil, il reçoit ses courses par diffusion en temps réel à tous les
+ * chauffeurs disponibles (premier arrivé, premier servi — voir
+ * courses.routes.js et taxi-moto.js). Le bouton "Faire une demande" n'a
+ * donc pas de sens sur son profil et est masqué dans ce cas.
  */
 
 import { requeteAPI } from "./api.js";
@@ -27,6 +34,7 @@ if (profilNom) {
   const profilNoteBadge = document.querySelector("#profilNoteBadge");
   const profilApropos = document.querySelector("#profilApropos");
   const profilDemandeLink = document.querySelector("#profilDemandeLink");
+  const profilCommanderCourseLink = document.querySelector("#profilCommanderCourseLink");
   const profilServicesListe = document.querySelector("#profilServicesListe");
   const profilGalerie = document.querySelector("#profilGalerie");
   const profilAvisSection = document.querySelector("#profilAvisSection");
@@ -58,11 +66,13 @@ if (profilNom) {
       profilNom.textContent = "Prestataire introuvable";
       if (profilApropos) profilApropos.textContent = "Ce profil n'existe pas ou n'est plus disponible.";
       if (profilDemandeLink) profilDemandeLink.style.display = "none";
+      if (profilCommanderCourseLink) profilCommanderCourseLink.style.display = "none";
       return;
     }
 
     const { prestataire, services, realisations } = reponse;
     const villeAffichee = [prestataire.ville, prestataire.quartier].filter(Boolean).join(" - ");
+    const estChauffeurTaxiMoto = prestataire.metier === "Taxi-moto";
 
     profilNom.textContent = prestataire.nom_complet;
     if (profilMetier) profilMetier.textContent = prestataire.metier || "";
@@ -73,8 +83,20 @@ if (profilNom) {
         prestataire.bio?.trim() ||
         `${prestataire.nom_complet} propose des services de ${prestataire.metier || "prestation"} à ${villeAffichee || "proximité"}.`;
     }
-    if (profilDemandeLink) {
-      profilDemandeLink.href = `demande.html?prestataireId=${prestataire.id}`;
+
+    // Deux call-to-action mutuellement exclusifs : un chauffeur taxi-moto
+    // ne reçoit jamais de demande ciblée envoyée depuis son profil (voir
+    // commentaire en tête de fichier) — il obtient à la place un lien
+    // direct vers le vrai canal de commande (diffusion en temps réel).
+    if (estChauffeurTaxiMoto) {
+      if (profilDemandeLink) profilDemandeLink.style.display = "none";
+      if (profilCommanderCourseLink) profilCommanderCourseLink.style.display = "";
+    } else {
+      if (profilCommanderCourseLink) profilCommanderCourseLink.style.display = "none";
+      if (profilDemandeLink) {
+        profilDemandeLink.style.display = "";
+        profilDemandeLink.href = `demande.html?prestataireId=${prestataire.id}`;
+      }
     }
 
     if (profilServicesListe) {
@@ -136,4 +158,3 @@ if (profilNom) {
 
   chargerProfil();
 }
-

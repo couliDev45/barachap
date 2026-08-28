@@ -24,10 +24,19 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "https://barachap.vercel.app";
  * (best-effort, jamais bloquant pour la réponse envoyée à l'utilisateur).
  */
 router.post("/register", async (req, res) => {
-  const { nomComplet, telephone, email, password, role, metier, ville, quartier } = req.body;
+  const { nomComplet, telephone, email, password, role, metier, ville, quartier, accepterConditions } = req.body;
 
   if (!nomComplet || !telephone || !password) {
     return res.status(400).json({ message: "Veuillez fournir le nom complet, le téléphone et le mot de passe." });
+  }
+
+  // Vérification côté serveur, jamais uniquement côté client (une case à
+  // cocher HTML se contourne trivialement avec un simple appel direct à
+  // cette route) : impossible de créer un compte sans accepter les CGU.
+  if (accepterConditions !== true) {
+    return res.status(400).json({
+      message: "Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour créer un compte.",
+    });
   }
 
   try {
@@ -45,8 +54,8 @@ router.post("/register", async (req, res) => {
     const statutValidation = userRole === "prestataire" ? "En attente" : "Validé";
 
     const newUser = await query(
-      `INSERT INTO users (nom_complet, telephone, email, password_hash, role, metier, ville, quartier, statut_validation)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO users (nom_complet, telephone, email, password_hash, role, metier, ville, quartier, statut_validation, conditions_acceptees_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
        RETURNING id, nom_complet, telephone, email, role, metier, ville, quartier, bio, photo_url, statut_validation, created_at`,
       [nomComplet, telephone, email || null, passwordHash, userRole, metier || null, ville || "Abidjan", quartier || null, statutValidation]
     );

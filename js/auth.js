@@ -8,6 +8,12 @@
  *
  * Note : inscription.html n'a pas de champ #email, donc email est toujours
  * null à l'inscription — c'est prévu et géré côté backend (email || null).
+ *
+ * L'inscription exige l'acceptation des conditions d'utilisation (case à
+ * cocher #accepterConditions, voir conditions-utilisation.html). Vérifiée
+ * ici côté client pour un retour immédiat, ET côté serveur dans
+ * auth.routes.js — la vérification client seule ne suffit jamais, une
+ * requête directe à l'API pourrait sinon contourner la case à cocher.
  */
 
 import { afficherNotification, ecrireStockage } from "./utils.js";
@@ -64,6 +70,7 @@ if (inscriptionForm) {
     const motdepasse = document.querySelector("#motdepasse")?.value;
     const confirmerMotdepasse = document.querySelector("#confirmerMotdepasse")?.value;
     const roleRadio = document.querySelector("input[name='role']:checked")?.value || "client";
+    const accepterConditions = document.querySelector("#accepterConditions")?.checked || false;
 
     if (!nomComplet || !telephone || !motdepasse) {
       afficherNotification("Veuillez remplir tous les champs obligatoires.", "error");
@@ -72,6 +79,14 @@ if (inscriptionForm) {
 
     if (motdepasse !== confirmerMotdepasse) {
       afficherNotification("Les mots de passe ne correspondent pas.", "error");
+      return;
+    }
+
+    if (!accepterConditions) {
+      afficherNotification(
+        "Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour créer un compte.",
+        "warning",
+      );
       return;
     }
 
@@ -107,6 +122,7 @@ if (inscriptionForm) {
         email: null,
         password: motdepasse,
         role: roleRadio,
+        accepterConditions,
         ...extraData,
       }),
     });
@@ -118,7 +134,7 @@ if (inscriptionForm) {
 
     if (!reponse || !reponse.token) {
       afficherNotification(
-        "Impossible de créer le compte pour le moment. Veuillez réessayer.",
+        reponse?.message || "Impossible de créer le compte pour le moment. Veuillez réessayer.",
         "error",
       );
       return;

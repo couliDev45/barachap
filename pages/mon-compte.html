@@ -5,23 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mon compte - BaraChap</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="../assets/logo/favicon-32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="../assets/logo/favicon-16.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="../assets/logo/favicon-180.png"
-    />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -36,331 +22,11 @@
     <link rel="stylesheet" href="../css/variables.css" />
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/responsive.css" />
-    <style>
-      /* ============================================================
-         Page "Mon compte" — liste groupée avec icônes.
-         ============================================================ */
-
-      .compte-section {
-        padding: 40px var(--spacing-medium) 80px;
-        background: var(--gray-light);
-        min-height: calc(100vh - 200px);
-      }
-
-      .compte-container {
-        max-width: 560px;
-        margin: 0 auto;
-      }
-
-      .lien-retour-dashboard {
-        display: inline-block;
-        margin-bottom: 20px;
-        text-decoration: none;
-        font-size: 14px;
-      }
-
-      /* --- En-tête profil : avatar + nom + badge rôle --- */
-      .compte-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 32px 20px;
-        margin-bottom: 24px;
-      }
-
-      .avatar-cercle {
-        position: relative;
-        width: 108px;
-        height: 108px;
-        border-radius: 50%;
-        cursor: pointer;
-        overflow: hidden;
-        border: 4px solid var(--white);
-        box-shadow: var(--shadow-card);
-        background: var(--white);
-      }
-
-      .avatar-cercle img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      /* Badge caméra toujours visible (pas un overlay au survol — le
-         survol n'existe pas au doigt sur mobile, c'était invisible pour
-         quiconque n'utilise pas de souris). */
-      .avatar-badge-camera {
-        position: absolute;
-        bottom: -2px;
-        right: -2px;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: var(--orange-primary);
-        border: 3px solid var(--gray-light);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-        pointer-events: none;
-      }
-
-      .avatar-statut {
-        font-size: 12px;
-        color: #999;
-        margin-top: 10px;
-        text-align: center;
-        min-height: 16px;
-      }
-
-      .compte-nom {
-        font-family: var(--font-title);
-        font-size: 22px;
-        font-weight: 800;
-        color: var(--blue-dark);
-        margin-top: 14px;
-        text-align: center;
-      }
-
-      .compte-souscribe {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 6px;
-      }
-
-      .compte-role-badge {
-        background: var(--orange-primary);
-        color: white;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 3px 12px;
-        border-radius: 20px;
-      }
-
-      .compte-telephone-affiche {
-        font-size: 13px;
-        color: #888;
-      }
-
-      /* --- Cartes de liste groupée --- */
-      .liste-groupee-label {
-        font-size: 13px;
-        font-weight: 700;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 24px 4px 8px;
-      }
-
-      .liste-groupee {
-        background: var(--white);
-        border-radius: var(--radius-medium);
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-      }
-
-      .ligne-reglage {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 13px 16px;
-        border-bottom: 1px solid #f0f0f0;
-      }
-
-      .ligne-reglage:last-child {
-        border-bottom: none;
-      }
-
-      .ligne-icone {
-        flex-shrink: 0;
-        width: 32px;
-        height: 32px;
-        border-radius: 9px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        color: white;
-      }
-
-      .icone-bleu {
-        background: var(--info-color);
-      }
-      .icone-orange {
-        background: var(--orange-primary);
-      }
-      .icone-vert {
-        background: var(--success-color);
-      }
-      .icone-gris {
-        background: #95a5a6;
-      }
-      .icone-marine {
-        background: var(--blue-dark);
-      }
-      .icone-rouge {
-        background: var(--danger-color);
-      }
-
-      .ligne-contenu {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .ligne-label {
-        font-size: 12px;
-        color: #999;
-        margin-bottom: 2px;
-      }
-
-      .ligne-reglage input,
-      .ligne-reglage textarea {
-        border: none;
-        padding: 0;
-        font-size: 15px;
-        font-family: var(--font-text);
-        color: var(--blue-dark);
-        background: transparent;
-        width: 100%;
-      }
-
-      .ligne-reglage input:focus,
-      .ligne-reglage textarea:focus {
-        outline: none;
-      }
-
-      .ligne-reglage input:disabled {
-        color: #aaa;
-      }
-
-      .ligne-reglage textarea {
-        resize: vertical;
-        min-height: 40px;
-      }
-
-      .liste-groupee-actions {
-        padding: 14px 16px;
-      }
-
-      .liste-groupee-actions .btn-primary {
-        width: 100%;
-      }
-
-      /* --- Ligne cliquable "Changer le mot de passe" (accordéon) --- */
-      .ligne-cliquable {
-        cursor: pointer;
-        user-select: none;
-      }
-
-      .ligne-chevron {
-        font-size: 20px;
-        color: #ccc;
-        transition: transform 0.25s ease;
-        flex-shrink: 0;
-      }
-
-      .ligne-cliquable.ouvert .ligne-chevron {
-        transform: rotate(90deg);
-      }
-
-      .accordeon-contenu {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-      }
-
-      .accordeon-contenu.ouvert {
-        max-height: 600px;
-      }
-
-      .accordeon-interieur {
-        padding: 4px 16px 18px;
-      }
-
-      /* --- Champ mot de passe avec bouton afficher/masquer --- */
-      .champ-mdp-wrapper {
-        position: relative;
-        margin-top: 14px;
-      }
-
-      .champ-mdp-wrapper label {
-        display: block;
-        font-size: 12px;
-        color: #999;
-        margin-bottom: 4px;
-      }
-
-      .champ-mdp-wrapper input {
-        width: 100%;
-        border: 1px solid #e5e5e5 !important;
-        border-radius: var(--radius-small);
-        padding: 10px 42px 10px 12px !important;
-        font-size: 15px;
-      }
-
-      .champ-mdp-wrapper input:focus {
-        border-color: var(--orange-primary) !important;
-        outline: none;
-      }
-
-      .btn-toggle-mdp {
-        position: absolute;
-        right: 6px;
-        bottom: 7px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 17px;
-        padding: 6px;
-        line-height: 1;
-      }
-
-      .force-mdp-barre {
-        height: 5px;
-        border-radius: 4px;
-        background: #e5e5e5;
-        margin-top: 10px;
-        overflow: hidden;
-      }
-
-      .force-mdp-remplissage {
-        height: 100%;
-        width: 0%;
-        border-radius: 4px;
-        transition:
-          width 0.25s ease,
-          background-color 0.25s ease;
-      }
-
-      .force-mdp-label {
-        font-size: 12px;
-        margin-top: 4px;
-        font-weight: 700;
-      }
-
-      .accordeon-message {
-        margin-top: 10px;
-      }
-
-      .accordeon-bouton {
-        width: 100%;
-        margin-top: 16px;
-      }
-
-      .champ-note-ligne {
-        font-size: 11px;
-        color: #bbb;
-        margin-top: 2px;
-      }
-    </style>
   </head>
   <body>
     <header class="header">
       <div class="logo">
-        <a href="../index.html" style="text-decoration: none">
+        <a href="../index.html" style="text-decoration: none;">
           <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" />
         </a>
       </div>
@@ -377,47 +43,27 @@
         <a href="../index.html#accueil">Accueil</a>
         <a href="services.html">Services</a>
         <a href="prestataires.html">Prestataires</a>
-        <a href="connexion.html" id="btnDeconnexion" class="btn-primary"
-          >Déconnexion</a
-        >
+        <a href="connexion.html" id="btnDeconnexion" class="btn-primary">Déconnexion</a>
       </nav>
     </header>
 
     <main>
       <section class="compte-section">
         <div class="compte-container">
-          <a href="#" id="lienRetourDashboard" class="lien-retour-dashboard"
-            >← Retour au tableau de bord</a
-          >
+          <a href="#" id="lienRetourDashboard" class="lien-retour-dashboard">← Retour au tableau de bord</a>
 
           <!-- En-tête : avatar + nom + rôle -->
           <div class="compte-header">
-            <div
-              class="avatar-cercle"
-              id="avatarCercle"
-              title="Changer ma photo"
-            >
-              <img
-                id="avatarApercu"
-                src="../assets/logo/favicon-192.png"
-                alt="Photo de profil"
-              />
+            <div class="avatar-cercle" id="avatarCercle" title="Changer ma photo">
+              <img id="avatarApercu" src="../assets/logo/favicon-192.png" alt="Photo de profil" />
               <div class="avatar-badge-camera">📷</div>
             </div>
-            <input
-              type="file"
-              id="avatarInput"
-              accept="image/*"
-              style="display: none"
-            />
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;" />
             <p class="avatar-statut" id="avatarStatut"></p>
             <p class="compte-nom" id="compteNomComplet">—</p>
             <div class="compte-souscribe">
               <span class="compte-role-badge" id="compteRoleBadge">—</span>
-              <span
-                class="compte-telephone-affiche"
-                id="compteTelephoneAffiche"
-              ></span>
+              <span class="compte-telephone-affiche" id="compteTelephoneAffiche"></span>
             </div>
           </div>
 
@@ -425,13 +71,11 @@
           <p class="liste-groupee-label">Profil</p>
           <div class="liste-groupee">
             <div class="ligne-reglage">
-              <div class="ligne-icone icone-gris"></div>
+              <div class="ligne-icone icone-gris">📱</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Numéro de téléphone</span>
                 <input type="text" id="compteTelephoneInput" disabled />
-                <span class="champ-note-ligne"
-                  >Sert d'identifiant de connexion — non modifiable ici</span
-                >
+                <span class="champ-note-ligne">Sert d'identifiant de connexion — non modifiable ici</span>
               </div>
             </div>
 
@@ -439,11 +83,7 @@
               <div class="ligne-icone icone-bleu">✉️</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Email de secours</span>
-                <input
-                  type="email"
-                  id="compteEmailInput"
-                  placeholder="Ex: exemple@email.com"
-                />
+                <input type="email" id="compteEmailInput" placeholder="Ex: exemple@email.com" />
               </div>
             </div>
 
@@ -451,11 +91,7 @@
               <div class="ligne-icone icone-orange">📍</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Ville</span>
-                <input
-                  type="text"
-                  id="compteVilleInput"
-                  placeholder="Ex: Seguela"
-                />
+                <input type="text" id="compteVilleInput" placeholder="Ex: Abidjan" />
               </div>
             </div>
 
@@ -463,51 +99,33 @@
               <div class="ligne-icone icone-vert">🏘️</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Quartier</span>
-                <input
-                  type="text"
-                  id="compteQuartierInput"
-                  placeholder="Ex: Manoir"
-                />
+                <input type="text" id="compteQuartierInput" placeholder="Ex: Cocody" />
               </div>
             </div>
 
-            <div id="blocChampsPrestataire" style="display: none">
+            <div id="blocChampsPrestataire" style="display: none;">
               <div class="ligne-reglage">
                 <div class="ligne-icone icone-gris">🛠️</div>
                 <div class="ligne-contenu">
                   <span class="ligne-label">Métier</span>
                   <input type="text" id="compteMetierInput" disabled />
-                  <span class="champ-note-ligne"
-                    >Contactez le service clients pour le modifier</span
-                  >
+                  <span class="champ-note-ligne">Contactez l'administration pour le modifier</span>
                 </div>
               </div>
 
               <div class="ligne-reglage">
                 <div class="ligne-icone icone-marine">📝</div>
                 <div class="ligne-contenu">
-                  <span class="ligne-label"
-                    >À propos (visible sur votre profil public)</span
-                  >
-                  <textarea
-                    id="compteBioInput"
-                    rows="3"
-                    placeholder="Présentez votre activité, votre expérience..."
-                  ></textarea>
+                  <span class="ligne-label">À propos (visible sur votre profil public)</span>
+                  <textarea id="compteBioInput" rows="3" placeholder="Présentez votre activité, votre expérience..."></textarea>
                 </div>
               </div>
             </div>
 
-            <div id="compteProfilMessage" style="padding: 0 16px"></div>
+            <div id="compteProfilMessage" style="padding: 0 16px;"></div>
 
             <div class="liste-groupee-actions">
-              <button
-                class="btn-primary"
-                id="btnSauverCompteProfil"
-                type="button"
-              >
-                Enregistrer les modifications
-              </button>
+              <button class="btn-primary" id="btnSauverCompteProfil" type="button">Enregistrer les modifications</button>
             </div>
           </div>
 
@@ -518,9 +136,7 @@
               <div class="ligne-icone icone-rouge">🔒</div>
               <div class="ligne-contenu">
                 <span class="ligne-label">Mot de passe</span>
-                <span style="font-size: 15px; color: var(--blue-dark)"
-                  >Changer mon mot de passe</span
-                >
+                <span style="font-size: 15px; color: var(--blue-dark);">Changer mon mot de passe</span>
               </div>
               <span class="ligne-chevron">›</span>
             </div>
@@ -529,71 +145,29 @@
               <div class="accordeon-interieur">
                 <div class="champ-mdp-wrapper">
                   <label for="mdpActuelInput">Mot de passe actuel</label>
-                  <input
-                    type="password"
-                    id="mdpActuelInput"
-                    placeholder="Votre mot de passe actuel"
-                  />
-                  <button
-                    type="button"
-                    class="btn-toggle-mdp"
-                    data-cible="mdpActuelInput"
-                  >
-                    👁
-                  </button>
+                  <input type="password" id="mdpActuelInput" placeholder="Votre mot de passe actuel" />
+                  <button type="button" class="btn-toggle-mdp" data-cible="mdpActuelInput">👁</button>
                 </div>
 
                 <div class="champ-mdp-wrapper">
                   <label for="mdpNouveauInput">Nouveau mot de passe</label>
-                  <input
-                    type="password"
-                    id="mdpNouveauInput"
-                    placeholder="Au moins 8 caractères"
-                    minlength="8"
-                  />
-                  <button
-                    type="button"
-                    class="btn-toggle-mdp"
-                    data-cible="mdpNouveauInput"
-                  >
-                    👁
-                  </button>
+                  <input type="password" id="mdpNouveauInput" placeholder="Au moins 6 caractères" />
+                  <button type="button" class="btn-toggle-mdp" data-cible="mdpNouveauInput">👁</button>
                 </div>
                 <div class="force-mdp-barre">
-                  <div
-                    class="force-mdp-remplissage"
-                    id="forceMdpRemplissage"
-                  ></div>
+                  <div class="force-mdp-remplissage" id="forceMdpRemplissage"></div>
                 </div>
                 <p class="force-mdp-label" id="forceMdpLabel"></p>
 
                 <div class="champ-mdp-wrapper">
-                  <label for="mdpConfirmerInput"
-                    >Confirmer le nouveau mot de passe</label
-                  >
-                  <input
-                    type="password"
-                    id="mdpConfirmerInput"
-                    placeholder="Répétez le nouveau mot de passe"
-                  />
-                  <button
-                    type="button"
-                    class="btn-toggle-mdp"
-                    data-cible="mdpConfirmerInput"
-                  >
-                    👁
-                  </button>
+                  <label for="mdpConfirmerInput">Confirmer le nouveau mot de passe</label>
+                  <input type="password" id="mdpConfirmerInput" placeholder="Répétez le nouveau mot de passe" />
+                  <button type="button" class="btn-toggle-mdp" data-cible="mdpConfirmerInput">👁</button>
                 </div>
 
                 <div id="compteMdpMessage" class="accordeon-message"></div>
 
-                <button
-                  class="btn-primary accordeon-bouton"
-                  id="btnChangerMdp"
-                  type="button"
-                >
-                  Changer le mot de passe
-                </button>
+                <button class="btn-primary accordeon-bouton" id="btnChangerMdp" type="button">Changer le mot de passe</button>
               </div>
             </div>
           </div>
@@ -604,12 +178,7 @@
     <footer class="findepage">
       <div class="findepage-container">
         <div class="footer-logo">
-          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
-          <img
-            src="../assets/logo/logo-color.png"
-            alt="Logo BaraChap"
-            loading="lazy"
-          />
+          <img src="../assets/logo/logo-color.png" alt="Logo BaraChap" loading="lazy" />
         </div>
         <p>Trouvez facilement des professionnels près de chez vous</p>
       </div>
@@ -623,9 +192,9 @@
       <div class="findepage-container">
         <h3>Contact</h3>
         <p>
-          Tel: +225 07 14 10 14 15<br />
-          Email: barachap24@gmail.com<br />
-          <span>Woroba, Côte d'Ivoire</span>
+          Tel: +225 07 00 00 00 00<br />
+          Email: contact@barachap.ci<br />
+          <span>Abidjan, Côte d'Ivoire</span>
         </p>
       </div>
       <div class="findepage-container">
