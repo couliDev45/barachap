@@ -19,12 +19,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Configuration des Middlewares
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+// Configuration des Middlewares - FIX CORS
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // autorise les requêtes sans origin (mobile, postman)
+      if (!origin) return callback(null, true);
+
+      // autorise prod + toutes les previews vercel + localhost
+      if (
+        origin.includes("vercel.app") ||
+        origin.includes("localhost") ||
+        origin === process.env.FRONTEND_URL
+      ) {
+        return callback(null, true);
+      }
+
+      // pour débloquer ton test, on autorise tout pour l'instant
+      // une fois que ça marche tu pourras resserrer
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -5,25 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaraChap - Trouvez un professionnel facilement</title>
     <link rel="icon" type="image/x-icon" href="../favicon.ico" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="../assets/logo/favicon-32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="../assets/logo/favicon-16.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="../assets/logo/favicon-180.png"
-    />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/favicon-180.png" />
     <link rel="manifest" href="../manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="BaraChap" />
@@ -38,50 +25,28 @@
     <link rel="stylesheet" href="../css/responsive.css" />
   </head>
   <body>
-    <header class="header">
-      <div class="logo">
-        <img src="../assets/logo/logo-color.png" alt="logobarachap" />
-      </div>
-      <button
-        class="nav-toggle"
-        aria-label="Ouvrir le menu"
-        aria-expanded="false"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav">
-        <a href="../index.html#accueil">Accueil</a>
-        <a href="services.html">Services</a>
-        <a href="prestataires.html">Prestataires</a>
-        <a href="inscription.html?role=prestataire">Devenir Prestataire</a>
-        <a href="connexion.html" class="btn-primary">Connexion</a>
-      </nav>
-    </header>
+    <barachap-header class="header"></barachap-header>
     <main>
       <section class="profil-details">
         <div class="profil-header">
-          <h2>Profil prestataire</h2>
-          <p>Tout savoir sur lui</p>
-        </div>
-        <div class="profil-photo">
           <!-- COMMENTAIRE IMAGE: Photo de profil du prestataire -->
-          <img
-            id="profilPhoto"
-            src="../assets/images/prestataire1.png"
-            alt="prestataire"
-          />
+          <img id="profilPhoto" src="../assets/images/prestataire1.png" alt="prestataire" />
           <h3 id="profilNom">Kouassi Abou</h3>
           <p id="profilMetier">Plombier</p>
           <span id="profilVille">Séguéla</span>
           <div class="rating-badge" id="profilNoteBadge">Pas encore d'avis</div>
-          <p id="profilAnciennete" style="font-size: 14px; color: #666"></p>
-          <a
-            href="demande.html"
-            id="profilDemandeLink"
-            class="btn-primary retour-btn"
+          <p id="profilAnciennete" style="font-size: 14px; color: #666;"></p>
+
+          <!-- Deux boutons mutuellement exclusifs (voir profil.js) : un
+               chauffeur taxi-moto ne reçoit jamais de demande ciblée envoyée
+               depuis son profil (ses courses arrivent par diffusion en temps
+               réel à tous les chauffeurs disponibles) — il a donc son propre
+               call-to-action vers le vrai canal de commande. -->
+          <a href="demande.html" id="profilDemandeLink" class="btn-primary retour-btn"
             >Faire une demande</a
+          >
+          <a href="taxi-moto.html" id="profilCommanderCourseLink" class="btn-primary retour-btn" style="display: none;"
+            >🏍️ Commander une course</a
           >
         </div>
         <div class="profil-info">
@@ -100,23 +65,11 @@
         <div class="galerie" id="profilGalerie">
           <h3>Réalisations</h3>
           <!-- COMMENTAIRE IMAGE: Photo réalisation 1 -->
-          <img
-            src="../assets/images/prestataire2.png"
-            alt="Réalisation 1"
-            loading="lazy"
-          />
+          <img src="../assets/images/prestataire2.png" alt="Réalisation 1" loading="lazy" />
           <!-- COMMENTAIRE IMAGE: Photo réalisation 2 -->
-          <img
-            src="../assets/images/prestataire2.png"
-            alt="Réalisation 2"
-            loading="lazy"
-          />
+          <img src="../assets/images/prestataire2.png" alt="Réalisation 2" loading="lazy" />
           <!-- COMMENTAIRE IMAGE: Photo réalisation 3 -->
-          <img
-            src="../assets/images/prestataire3.png"
-            alt="Réalisation 3"
-            loading="lazy"
-          />
+          <img src="../assets/images/prestataire3.png" alt="Réalisation 3" loading="lazy" />
         </div>
         <div class="avis" id="profilAvisSection">
           <h3>Avis des clients</h3>
@@ -134,45 +87,7 @@
       </section>
     </main>
 
-    <footer class="findepage">
-      <div class="findepage-container">
-        <div class="footer-logo">
-          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
-          <img
-            src="../assets/logo/logo-color.png"
-            alt="Logo BaraChap"
-            loading="lazy"
-          />
-        </div>
-        <p>Trouvez facilement des professionnels près de chez vous</p>
-      </div>
-      <div class="findepage-container">
-        <h3>Liens utiles</h3>
-        <a href="../index.html#accueil">Accueil</a>
-        <a href="services.html">Services</a>
-        <a href="prestataires.html">Prestataires</a>
-        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
-      </div>
-      <div class="findepage-container">
-        <h3>Contact</h3>
-        <p>
-          Tel: +225 07 14 10 14 15<br />
-          Email: barachap24@gmail.com<br />
-          <span>Woroba, Côte d'Ivoire</span>
-        </p>
-      </div>
-      <div class="findepage-container">
-        <h3>Réseaux sociaux</h3>
-        <p>
-          Facebook<br />
-          Instagram<br />
-          LinkedIn
-        </p>
-      </div>
-      <hr />
-      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
-    </footer>
-
+    <barachap-footer class="findepage"></barachap-footer>
     <script type="module" src="../js/main.js"></script>
     <div id="notification" class="notification">
       <span id="notification-message"></span>
