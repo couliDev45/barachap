@@ -24,6 +24,7 @@
     />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#FF8C42" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="BaraChap" />
@@ -38,29 +39,7 @@
     <link rel="stylesheet" href="css/responsive.css" />
   </head>
   <body>
-    <header class="header">
-      <div class="logo">
-        <img src="assets/logo/logo-color.png" alt="logobarachap" />
-      </div>
-      <button
-        class="nav-toggle"
-        aria-label="Ouvrir le menu"
-        aria-expanded="false"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav">
-        <a href="#accueil">Accueil</a>
-        <a href="pages/services.html">Services</a>
-        <a href="pages/prestataires.html">Prestataires</a>
-        <a href="pages/inscription.html?role=prestataire"
-          >Devenir Prestataire</a
-        >
-        <a href="pages/connexion.html" class="btn-primary">Connexion</a>
-      </nav>
-    </header>
+    <barachap-header class="header"></barachap-header>
 
     <section class="hero" id="accueil">
       <div class="hero-content">
@@ -327,46 +306,9 @@
       </div>
     </section>
 
-    <footer class="findepage">
-      <div class="findepage-container">
-        <div class="footer-logo">
-          <!-- COMMENTAIRE IMAGE: Logo footer BaraChap -->
-          <img
-            src="../assets/logo/logo-color.png"
-            alt="Logo BaraChap"
-            loading="lazy"
-          />
-        </div>
-        <p>Trouvez facilement des professionnels près de chez vous</p>
-      </div>
-      <div class="findepage-container">
-        <h3>Liens utiles</h3>
-        <a href="../index.html#accueil">Accueil</a>
-        <a href="services.html">Services</a>
-        <a href="prestataires.html">Prestataires</a>
-        <a href="inscription.html?role=prestataire">Devenir prestataire</a>
-      </div>
-      <div class="findepage-container">
-        <h3>Contact</h3>
-        <p>
-          Tel: +225 07 14 10 14 15<br />
-          Email: barachap24@gmail.com<br />
-          <span>Woroba, Côte d'Ivoire</span>
-        </p>
-      </div>
-      <div class="findepage-container">
-        <h3>Réseaux sociaux</h3>
-        <p>
-          Facebook<br />
-          Instagram<br />
-          LinkedIn
-        </p>
-      </div>
-      <hr />
-      <p class="copyright">© 2026 BaraChap. Tous droits réservés.</p>
-    </footer>
+    <barachap-footer class="findepage"></barachap-footer>
 
-    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
     <div id="notification" class="notification">
       <span id="notification-message"></span>
     </div>
